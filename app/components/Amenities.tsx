@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { supabase } from '../lib/supabase';
 
 type Amenity = { id?: string; name: string; description: string; icon: string; image?: string };
@@ -71,8 +72,15 @@ export const Amenities: React.FC = () => {
           ))}
         </div>
 
-        <div className="rounded-2xl overflow-hidden shadow-2xl">
-          <img src={heroImage} alt="Amenities" className="w-full h-96 object-cover" />
+        <div className="rounded-2xl overflow-hidden shadow-2xl relative h-96">
+          <Image
+            src={heroImage}
+            alt="Amenities"
+            fill
+            sizes="(max-width: 768px) 100vw, 1200px"
+            className="object-cover"
+            priority
+          />
         </div>
       </div>
     </section>

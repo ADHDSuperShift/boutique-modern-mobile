@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { events as fallbackEvents } from '../data/events';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
@@ -77,11 +78,15 @@ export const Events: React.FC = () => {
               className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 overflow-hidden hover:shadow-2xl hover:ring-amber-300 transition-all cursor-pointer transform hover:scale-105 backdrop-blur-sm"
               onClick={() => setSelectedEvent(event)}
             >
-              <img 
-                src={event.image} 
-                alt={event.title}
-                className="w-full h-64 object-cover"
-              />
+              <div className="relative w-full h-64">
+                <Image 
+                  src={event.image} 
+                  alt={event.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover"
+                />
+              </div>
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-sm">
@@ -106,11 +111,16 @@ export const Events: React.FC = () => {
       <Modal isOpen={!!selectedEvent} onClose={() => setSelectedEvent(null)}>
         {selectedEvent && (
           <div>
-            <img 
-              src={selectedEvent.image} 
-              alt={selectedEvent.title}
-              className="w-full h-96 object-cover"
-            />
+            <div className="relative w-full h-96">
+              <Image 
+                src={selectedEvent.image} 
+                alt={selectedEvent.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 1000px"
+                className="object-cover"
+                priority
+              />
+            </div>
             <div className="p-8 bg-gradient-to-br from-white to-amber-50/50">
               <div className="flex items-center gap-3 mb-4">
                 <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-4 py-2 rounded-full font-medium shadow-sm">
