@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { ImageDropzone } from '../ui/ImageDropzone';
 
 interface Wine {
   id: string;
@@ -121,17 +122,25 @@ export const EditWineModal: React.FC<EditWineModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Image URL
-            </label>
-            <input
-              type="url"
-              value={formData.image}
-              onChange={(e) => handleInputChange('image', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white/80 backdrop-blur-sm"
-              placeholder="https://..."
-              required
+            <label className="block text-sm font-medium text-slate-700 mb-3">Wine Bottle Image</label>
+            <ImageDropzone
+              currentImage={formData.image}
+              onImageUpload={(imageUrl) => handleInputChange('image', imageUrl)}
+              label="Drag & drop your wine bottle image here, or click to browse"
+              folder="wines"
             />
+            
+            {/* Fallback URL input for manual entry */}
+            <div className="mt-4">
+              <label className="block text-xs font-medium text-slate-500 mb-1">Or enter image URL manually:</label>
+              <input
+                type="url"
+                value={formData.image}
+                onChange={(e) => handleInputChange('image', e.target.value)}
+                placeholder="https://example.com/wine-bottle.jpg"
+                className="w-full px-3 py-2 text-sm rounded border border-slate-200 focus:ring-1 focus:ring-amber-400 focus:border-amber-400 bg-white/80"
+              />
+            </div>
           </div>
 
           {/* Image Preview */}

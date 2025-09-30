@@ -8,6 +8,7 @@ import { EventsManager } from './EventsManager';
 import { WinesManager } from './WinesManager';
 import { BookingsView } from './BookingsView';
 import { AdminDebugPanel } from './AdminDebugPanel';
+import { AdminErrorBoundary } from './AdminErrorBoundary';
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('rooms');
@@ -57,12 +58,30 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="p-6">
-            <AdminDebugPanel />
-            
-            {activeTab === 'rooms' && <RoomsManager />}
-            {activeTab === 'events' && <EventsManager />}
-            {activeTab === 'wines' && <WinesManager />}
-            {activeTab === 'bookings' && <BookingsView />}
+            <AdminErrorBoundary>
+              <AdminDebugPanel />
+              
+              {activeTab === 'rooms' && (
+                <AdminErrorBoundary>
+                  <RoomsManager />
+                </AdminErrorBoundary>
+              )}
+              {activeTab === 'events' && (
+                <AdminErrorBoundary>
+                  <EventsManager />
+                </AdminErrorBoundary>
+              )}
+              {activeTab === 'wines' && (
+                <AdminErrorBoundary>
+                  <WinesManager />
+                </AdminErrorBoundary>
+              )}
+              {activeTab === 'bookings' && (
+                <AdminErrorBoundary>
+                  <BookingsView />
+                </AdminErrorBoundary>
+              )}
+            </AdminErrorBoundary>
           </div>
         </div>
       </div>

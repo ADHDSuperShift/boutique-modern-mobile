@@ -41,9 +41,10 @@ interface SortableRoomItemProps {
   room: Room;
   onEdit: (room: Room) => void;
   onDelete: (id: string) => void;
+  editingRoom: Room | null;
 }
 
-const SortableRoomItem: React.FC<SortableRoomItemProps> = ({ room, onEdit, onDelete }) => {
+const SortableRoomItem: React.FC<SortableRoomItemProps> = ({ room, onEdit, onDelete, editingRoom }) => {
   const {
     attributes,
     listeners,
@@ -91,15 +92,17 @@ const SortableRoomItem: React.FC<SortableRoomItemProps> = ({ room, onEdit, onDel
       <div className="flex gap-2 ml-4">
         <Button 
           variant="secondary" 
-          className="text-sm" 
+          className={`text-sm transition-all duration-200 ${editingRoom?.id === room.id ? 'bg-amber-100 border-amber-300' : ''}`}
           onClick={() => onEdit(room)}
+          disabled={!!editingRoom}
         >
-          Edit
+          {editingRoom?.id === room.id ? 'Editing...' : 'Edit'}
         </Button>
         <Button 
           variant="outline" 
           className="text-sm text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
           onClick={() => onDelete(room.id)}
+          disabled={!!editingRoom}
         >
           Delete
         </Button>
@@ -113,6 +116,7 @@ export const RoomsManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -186,10 +190,20 @@ export const RoomsManager: React.FC = () => {
 
   const handleEdit = (room: Room) => {
     console.log('🔧 Opening edit modal for room:', room);
-    setEditingRoom(room);
+    console.log('🔧 Current editingRoom state:', editingRoom);
+    
+    // Ensure we create a fresh copy to avoid reference issues
+    const roomCopy = { ...room };
+    setEditingRoom(roomCopy);
   };
 
   const handleSaveEdit = async (updatedRoom: Room) => {
+    if (isModalLoading) {
+      console.log('🔧 Save already in progress, ignoring...');
+      return;
+    }
+    
+    setIsModalLoading(true);
     console.log('🔧 Saving room:', updatedRoom);
     
     try {
@@ -222,7 +236,15 @@ export const RoomsManager: React.FC = () => {
       setEditingRoom(null);
       
       alert('⚠️ Room updated locally (database may not be connected yet)');
+    } finally {
+      setIsModalLoading(false);
     }
+  };
+
+  const handleCancelEdit = () => {
+    console.log('🔧 Canceling edit...');
+    setEditingRoom(null);
+    setIsModalLoading(false);
   };
 
   if (loading) return <div className="text-center py-8 text-slate-600">Loading...</div>;
@@ -253,6 +275,7 @@ export const RoomsManager: React.FC = () => {
                 room={room}
                 onEdit={handleEdit}
                 onDelete={deleteRoom}
+                editingRoom={editingRoom}
               />
             ))}
           </div>
@@ -265,12 +288,13 @@ export const RoomsManager: React.FC = () => {
         </div>
       )}
 
-      {/* Edit Modal would go here */}
+      {/* Edit Modal */}
       {editingRoom && (
         <EditRoomModal
           room={editingRoom}
           onSave={handleSaveEdit}
-          onCancel={() => setEditingRoom(null)}
+          onCancel={handleCancelEdit}
+          isLoading={isModalLoading}
         />
       )}
     </div>

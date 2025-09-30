@@ -5,6 +5,8 @@ CREATE TABLE rooms (
   type TEXT NOT NULL,
   description TEXT,
   short_description TEXT,
+  price INTEGER DEFAULT 0,
+  image TEXT,
   amenities JSONB DEFAULT '[]'::jsonb,
   images TEXT[] DEFAULT ARRAY[]::TEXT[],
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -108,3 +110,12 @@ CREATE POLICY "Admins can view bookings" ON bookings FOR SELECT USING (auth.jwt(
 CREATE POLICY "Admins can view reservations" ON restaurant_reservations FOR SELECT USING (auth.jwt()->>'role' = 'admin');
 CREATE POLICY "Admins can view contacts" ON contacts FOR SELECT USING (auth.jwt()->>'role' = 'admin');
 CREATE POLICY "Admins can view inquiries" ON wine_inquiries FOR SELECT USING (auth.jwt()->>'role' = 'admin');
+
+-- Storage bucket for room images
+INSERT INTO storage.buckets (id, name, public) VALUES ('room-images', 'room-images', true);
+
+-- Storage policies for room images
+CREATE POLICY "Public can view room images" ON storage.objects FOR SELECT USING (bucket_id = 'room-images');
+CREATE POLICY "Admins can upload room images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'room-images' AND auth.jwt()->>'role' = 'admin');
+CREATE POLICY "Admins can update room images" ON storage.objects FOR UPDATE USING (bucket_id = 'room-images' AND auth.jwt()->>'role' = 'admin');
+CREATE POLICY "Admins can delete room images" ON storage.objects FOR DELETE USING (bucket_id = 'room-images' AND auth.jwt()->>'role' = 'admin');

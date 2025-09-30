@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
+import { ImageDropzone } from '../ui/ImageDropzone';
 
 interface Room {
   id: string;
@@ -18,13 +19,19 @@ interface EditRoomModalProps {
   room: Room;
   onSave: (room: Room) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-export const EditRoomModal: React.FC<EditRoomModalProps> = ({ room, onSave, onCancel }) => {
+export const EditRoomModal: React.FC<EditRoomModalProps> = ({ room, onSave, onCancel, isLoading = false }) => {
   const [formData, setFormData] = useState<Room>(room);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) {
+      console.log('🔧 Form submission blocked - save in progress');
+      return;
+    }
+    console.log('🔧 Form submitted with data:', formData);
     onSave(formData);
   };
 
@@ -32,6 +39,20 @@ export const EditRoomModal: React.FC<EditRoomModalProps> = ({ room, onSave, onCa
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleAddImage = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...(prev.images || []), imageUrl]
+    }));
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images?.filter((_, i) => i !== index) || []
     }));
   };
 
@@ -88,21 +109,78 @@ export const EditRoomModal: React.FC<EditRoomModalProps> = ({ room, onSave, onCa
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
-            <input
-              type="url"
-              required
-              value={formData.image}
-              onChange={(e) => handleChange('image', e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 bg-white/80 backdrop-blur-sm transition-all duration-200"
+            <label className="block text-sm font-medium text-slate-700 mb-3">Room Image</label>
+            <ImageDropzone
+              currentImage={formData.image}
+              onImageUpload={(imageUrl) => handleChange('image', imageUrl)}
+              label="Drag & drop your room image here, or click to browse"
+              folder="rooms"
+            />
+            
+            {/* Fallback URL input for manual entry */}
+            <div className="mt-4">
+              <label className="block text-xs font-medium text-slate-500 mb-1">Or enter image URL manually:</label>
+              <input
+                type="url"
+                value={formData.image}
+                onChange={(e) => handleChange('image', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className="w-full px-3 py-2 text-sm rounded border border-slate-200 focus:ring-1 focus:ring-amber-400 focus:border-amber-400 bg-white/80"
+              />
+            </div>
+          </div>
+
+          {/* Additional Images Gallery */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-3">Additional Images (Gallery)</label>
+            
+            {/* Existing gallery images */}
+            {formData.images && formData.images.length > 0 && (
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {formData.images.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <img 
+                      src={image} 
+                      alt={`Gallery ${index + 1}`}
+                      className="w-full h-20 object-cover rounded-lg shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Add new image */}
+            <ImageDropzone
+              onImageUpload={handleAddImage}
+              label="Add more room photos to gallery"
+              className="border-dashed border-slate-300"
+              folder="rooms"
             />
           </div>
 
           <div className="flex gap-4 pt-4">
-            <Button type="submit" variant="primary" className="flex-1">
-              Save Changes
+            <Button 
+              type="submit" 
+              variant="primary" 
+              className="flex-1"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onCancel} 
+              className="flex-1"
+              disabled={isLoading}
+            >
               Cancel
             </Button>
           </div>
