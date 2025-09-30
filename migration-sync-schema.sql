@@ -21,6 +21,48 @@ ALTER TABLE IF EXISTS wines ADD COLUMN IF NOT EXISTS vintage TEXT;
 ALTER TABLE IF EXISTS wines ADD COLUMN IF NOT EXISTS region TEXT;
 ALTER TABLE IF EXISTS wines ADD COLUMN IF NOT EXISTS sort_order INT;
 
+-- Hero section (single row)
+CREATE TABLE IF NOT EXISTS hero_section (
+	id TEXT PRIMARY KEY DEFAULT 'hero',
+	title TEXT,
+	subtitle TEXT,
+	description TEXT,
+	backgroundImage TEXT,
+	ctaText TEXT,
+	ctaLink TEXT
+);
+
+-- Restaurant info (single row)
+CREATE TABLE IF NOT EXISTS restaurant_info (
+	id TEXT PRIMARY KEY DEFAULT 'restaurant',
+	title TEXT,
+	subtitle TEXT,
+	description TEXT,
+	features TEXT[] DEFAULT ARRAY[]::TEXT[],
+	backgroundImage TEXT,
+	menuSections JSONB DEFAULT '[]'::jsonb
+);
+
+-- Public forms
+CREATE TABLE IF NOT EXISTS restaurant_reservations (
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	name TEXT NOT NULL,
+	email TEXT NOT NULL,
+	date DATE NOT NULL,
+	time TEXT NOT NULL,
+	guests INT NOT NULL DEFAULT 2,
+	created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS wine_inquiries (
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	wine_id TEXT,
+	name TEXT NOT NULL,
+	email TEXT NOT NULL,
+	message TEXT NOT NULL,
+	created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Optional: reload PostgREST schema cache (hosted Supabase supports this)
 NOTIFY pgrst, 'reload schema';
 

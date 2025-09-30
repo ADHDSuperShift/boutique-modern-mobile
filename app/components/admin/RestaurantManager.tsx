@@ -97,11 +97,15 @@ export const RestaurantManager: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: restaurantData.id || 'restaurant', ...payload })
       });
-      if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
-      alert('✅ Restaurant information updated successfully!');
+      if (!res.ok) {
+        console.warn('Restaurant upsert failed:', await res.json());
+        alert('⚠️ Restaurant info updated locally (database may not be connected yet)');
+      } else {
+        alert('✅ Restaurant information updated successfully!');
+      }
     } catch (err) {
-      console.error('Error updating restaurant info:', err);
-      alert('⚠️ Restaurant info updated locally (database may not be connected yet)');
+  console.error('Error updating restaurant info:', err);
+  alert('⚠️ Restaurant info updated locally (database may not be connected yet)');
     } finally {
       setSaving(false);
     }

@@ -65,11 +65,15 @@ export const HeroManager: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: heroData.id || 'hero', ...payload })
       });
-      if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
-      alert('✅ Hero section updated successfully!');
+      if (!res.ok) {
+        console.warn('Hero upsert failed:', await res.json());
+        alert('⚠️ Hero section updated locally (database may not be connected yet)');
+      } else {
+        alert('✅ Hero section updated successfully!');
+      }
     } catch (err) {
-      console.error('Error updating hero section:', err);
-      alert('⚠️ Hero section updated locally (database may not be connected yet)');
+  console.error('Error updating hero section:', err);
+  alert('⚠️ Hero section updated locally (database may not be connected yet)');
     } finally {
       setSaving(false);
     }
