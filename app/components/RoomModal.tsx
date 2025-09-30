@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
 import type { PublicRoom } from './Rooms';
@@ -35,10 +36,13 @@ export const RoomModal: React.FC<RoomModalProps> = ({ room, isOpen, onClose, onB
         <div className="mb-6">
           <div className="relative h-96 rounded-xl overflow-hidden mb-4">
             {images[0] ? (
-              <img 
+              <Image 
                 src={images[currentImage]}
                 alt={room.name}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 1000px"
+                className="object-cover"
+                priority
               />
             ) : (
               <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">

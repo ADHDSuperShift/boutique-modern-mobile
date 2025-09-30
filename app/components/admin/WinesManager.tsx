@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { wines as staticWines } from '../../data/wines';
@@ -76,11 +77,15 @@ const SortableWineItem: React.FC<SortableWineItemProps> = ({ wine, onEdit, onDel
           </svg>
         </div>
         
-        <img 
-          src={wine.image} 
-          alt={wine.name}
-          className="w-16 h-16 object-contain rounded-lg bg-white ring-1 ring-slate-200"
-        />
+        <div className="relative w-16 h-16">
+          <Image 
+            src={wine.image} 
+            alt={wine.name}
+            fill
+            sizes="64px"
+            className="object-contain rounded-lg bg-white ring-1 ring-slate-200"
+          />
+        </div>
         <div className="flex-1">
           <h3 className="font-bold text-lg text-slate-800 mb-1">{wine.name}</h3>
           <p className="text-slate-600 mb-1">{wine.region}</p>

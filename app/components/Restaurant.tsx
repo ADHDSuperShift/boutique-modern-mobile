@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
 import { supabase } from '../lib/supabase';
@@ -73,11 +74,14 @@ export const Restaurant: React.FC = () => {
               {copy.description}
             </p>
           </div>
-          <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200/50">
-            <img 
+          <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200/50 relative h-96">
+            <Image 
               src={copy.heroImage}
               alt="Restaurant Interior"
-              className="w-full h-96 object-cover hover:scale-105 transition-transform duration-700"
+              fill
+              sizes="(max-width: 1024px) 100vw, 800px"
+              className="object-cover hover:scale-105 transition-transform duration-700"
+              priority
             />
           </div>
         </div>
@@ -86,7 +90,9 @@ export const Restaurant: React.FC = () => {
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {dishes.map((dish, idx) => (
             <div key={idx} className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg ring-1 ring-slate-200/50 overflow-hidden hover:shadow-2xl hover:ring-amber-200/50 transition-all duration-300 group">
-              <img src={dish.image} alt={dish.name} className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="relative w-full h-64">
+                <Image src={dish.image} alt={dish.name} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
               <div className="p-6">
                 <h4 className="text-xl font-bold text-slate-800 mb-2">{dish.name}</h4>
                 <p className="text-slate-600">{dish.desc}</p>

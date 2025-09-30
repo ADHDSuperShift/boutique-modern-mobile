@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Button } from './ui/Button';
 import type { PublicRoom } from './Rooms';
 
@@ -12,10 +13,12 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onDetails, onBook }) =
   return (
     <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 overflow-hidden transform hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:ring-amber-300 backdrop-blur-sm">
       <div className="relative h-64 overflow-hidden">
-        <img 
+        <Image 
           src={room.image} 
           alt={room.name}
-          className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover transform hover:scale-110 transition-transform duration-500"
         />
         <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
           {room.type}

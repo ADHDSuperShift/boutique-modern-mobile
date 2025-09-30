@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { ImageDropzone } from '../ui/ImageDropzone';
@@ -150,14 +151,15 @@ export const EditWineModal: React.FC<EditWineModalProps> = ({
                 Image Preview
               </label>
               <div className="flex justify-center">
-                <img 
-                  src={formData.image} 
-                  alt="Wine preview"
-                  className="w-20 h-20 object-contain rounded-lg bg-white ring-1 ring-slate-200"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
+                <div className="relative w-20 h-20">
+                  <Image 
+                    src={formData.image} 
+                    alt="Wine preview"
+                    fill
+                    sizes="80px"
+                    className="object-contain rounded-lg bg-white ring-1 ring-slate-200"
+                  />
+                </div>
               </div>
             </div>
           )}

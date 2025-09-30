@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { events as staticEvents } from '../../data/events';
@@ -76,11 +77,15 @@ const SortableEventItem: React.FC<SortableEventItemProps> = ({ event, onEdit, on
           </svg>
         </div>
         
-        <img 
-          src={event.image} 
-          alt={event.title}
-          className="w-20 h-20 object-cover rounded-lg ring-1 ring-slate-200"
-        />
+            <div className="relative w-24 h-24">
+              <Image 
+                src={event.image}
+                alt={event.title}
+                fill
+                sizes="96px"
+                className="object-cover rounded"
+              />
+            </div>
         <div className="flex-1">
           <h3 className="font-bold text-lg text-slate-800 mb-1">{event.title}</h3>
           <p className="text-slate-600 mb-1">{event.category}</p>
