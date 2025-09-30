@@ -20,7 +20,7 @@ export const HeroManager: React.FC = () => {
     title: 'Luxury Boutique Hotel & Wine Estate',
     subtitle: 'Experience Elegance in the Heart of Wine Country',
     description: 'Indulge in world-class accommodations, exquisite dining, and award-winning wines at our exclusive boutique retreat.',
-    backgroundImage: '/hero-bg.jpg',
+  backgroundImage: 'https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215800577_ecbf1d1d.webp',
     ctaText: 'Book Your Stay',
     ctaLink: '#rooms'
   });
@@ -35,11 +35,19 @@ export const HeroManager: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('hero_section')
-        .select('*')
-        .single();
+        .select('id,title,subtitle,description,background_image,cta_text,cta_link')
+        .maybeSingle();
 
       if (data && !error) {
-        setHeroData(data);
+        setHeroData({
+          id: data.id,
+          title: data.title ?? '',
+          subtitle: data.subtitle ?? '',
+          description: data.description ?? '',
+          backgroundImage: data.background_image ?? heroData.backgroundImage,
+          ctaText: data.cta_text ?? 'Book Your Stay',
+          ctaLink: data.cta_link ?? '#rooms'
+        });
       }
     } catch (err) {
       console.log('Using default hero data');
@@ -51,7 +59,7 @@ export const HeroManager: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = {
+  const payload = {
         title: heroData.title,
         subtitle: heroData.subtitle,
         description: heroData.description,

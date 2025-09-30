@@ -71,7 +71,15 @@ export const RestaurantManager: React.FC = () => {
         .single();
 
       if (data && !error) {
-        setRestaurantData(data);
+        setRestaurantData({
+          id: data.id,
+          title: data.title ?? 'Gourmet Restaurant',
+          subtitle: data.subtitle ?? 'Farm-to-Table Excellence',
+          description: data.description ?? 'Our award-winning restaurant showcases the finest local ingredients, paired perfectly with our estate wines.',
+          features: Array.isArray(data.features) ? data.features : [],
+          backgroundImage: data.background_image ?? data.backgroundImage ?? '/restaurant-bg.jpg',
+          menuSections: Array.isArray(data.menu_sections) || typeof data.menu_sections === 'object' ? data.menu_sections : []
+        });
       }
     } catch (err) {
       console.log('Using default restaurant data');

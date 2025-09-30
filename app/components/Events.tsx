@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { events as fallbackEvents } from '../data/events';
+import { supabase } from '../lib/supabase';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
-import { supabase } from '../lib/supabase';
 
 type EventItem = {
   id: string;
@@ -17,16 +17,17 @@ type EventItem = {
 };
 
 export const Events: React.FC = () => {
-  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [items, setItems] = useState<EventItem[]>(fallbackEvents as unknown as EventItem[]);
   const [loading, setLoading] = useState(true);
+  const [enquireFor, setEnquireFor] = useState<EventItem | null>(null);
+  const [enq, setEnq] = useState({ name: '', email: '', message: '' });
 
   useEffect(() => {
     const load = async () => {
       try {
         const { data, error } = await supabase
           .from('events')
-          .select('*')
+          .select('id,title,date,image,description,category')
           .order('sort_order', { ascending: true, nullsFirst: false })
           .order('date', { ascending: true });
         if (!error && data) {
@@ -50,6 +51,20 @@ export const Events: React.FC = () => {
     load();
   }, []);
 
+  const formatMonth = (d: Date) => d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+  const formatDay = (d: Date) => d.getDate();
+  const formatTime = (d: Date) => {
+    const hrs = d.getHours();
+    const mins = d.getMinutes();
+    if (hrs === 0 && mins === 0) return '';
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  };
+
+  const events = useMemo(() => items.map(e => ({
+    ...e,
+    dateObj: new Date(e.date)
+  })), [items]);
+
   if (loading) {
     return (
       <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50">
@@ -71,76 +86,103 @@ export const Events: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {items.map((event) => (
-            <div 
-              key={event.id} 
-              className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 overflow-hidden hover:shadow-2xl hover:ring-amber-300 transition-all cursor-pointer transform hover:scale-105 backdrop-blur-sm"
-              onClick={() => setSelectedEvent(event)}
-            >
-              <div className="relative w-full h-64">
-                <Image 
-                  src={event.image} 
-                  alt={event.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-sm">
-                    {event.category}
-                  </span>
-                  <span className="text-slate-600 text-sm">
-                    {new Date(event.date).toLocaleDateString('en-US', { 
-                      month: 'long', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })}
-                  </span>
+        <div className="grid md:grid-cols-3 gap-6">
+          {events.map((event) => (
+            <div key={event.id} className="bg-white rounded-xl shadow-sm ring-1 ring-slate-200 p-4">
+              <div className="flex items-center gap-4">
+                {/* Thumbnail */}
+                <div className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden ring-1 ring-slate-200">
+                  <Image
+                    src={event.image}
+                    alt={event.title}
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">{event.title}</h3>
-                <p className="text-slate-600 line-clamp-3">{event.description}</p>
+                {/* Date + details */}
+                <div className="flex items-center gap-4 w-full">
+                  <div className="flex flex-col items-center justify-center bg-slate-100 rounded-lg px-3 py-2 w-16 shrink-0">
+                    <div className="text-[10px] font-semibold tracking-wider text-slate-600">{formatMonth(event.dateObj)}</div>
+                    <div className="text-xl font-bold text-slate-800 leading-none">{formatDay(event.dateObj)}</div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                      {event.category && (
+                        <span className="inline-flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          {event.category}
+                        </span>
+                      )}
+                      {formatTime(event.dateObj) && (
+                        <span className="inline-flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                          {formatTime(event.dateObj)}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-slate-800 truncate">{event.title}</h3>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Button size="sm" variant="outline" onClick={() => setEnquireFor(event)}>Enquire</Button>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <Modal isOpen={!!selectedEvent} onClose={() => setSelectedEvent(null)}>
-        {selectedEvent && (
-          <div>
-            <div className="relative w-full h-96">
-              <Image 
-                src={selectedEvent.image} 
-                alt={selectedEvent.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 1000px"
-                className="object-cover"
-                priority
+      <Modal isOpen={!!enquireFor} onClose={() => { setEnquireFor(null); setEnq({ name: '', email: '', message: '' }); }}>
+        {enquireFor && (
+          <div className="p-6 bg-white">
+            <h3 className="text-xl font-semibold mb-4">Enquire about: {enquireFor.title}</h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  await supabase.from('event_inquiries').insert({
+                    event_id: enquireFor.id,
+                    name: enq.name,
+                    email: enq.email,
+                    message: enq.message,
+                  });
+                  alert('Thanks! We\'ll get back to you.');
+                } catch (_) {
+                  alert('Enquiry submitted (offline mode).');
+                } finally {
+                  setEnquireFor(null);
+                  setEnq({ name: '', email: '', message: '' });
+                }
+              }}
+              className="space-y-3"
+            >
+              <input
+                type="text"
+                required
+                placeholder="Your name"
+                value={enq.name}
+                onChange={(e) => setEnq({ ...enq, name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg"
               />
-            </div>
-            <div className="p-8 bg-gradient-to-br from-white to-amber-50/50">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-4 py-2 rounded-full font-medium shadow-sm">
-                  {selectedEvent.category}
-                </span>
-                <span className="text-slate-600 text-lg">
-                  {new Date(selectedEvent.date).toLocaleDateString('en-US', { 
-                    weekday: 'long',
-                    month: 'long', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })}
-                </span>
-              </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">{selectedEvent.title}</h2>
-              <p className="text-slate-600 text-lg mb-6">{selectedEvent.description}</p>
-              <Button variant="primary" className="w-full">
-                Register Interest
-              </Button>
-            </div>
+              <input
+                type="email"
+                required
+                placeholder="Your email"
+                value={enq.email}
+                onChange={(e) => setEnq({ ...enq, email: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+              />
+              <textarea
+                required
+                placeholder="Message"
+                value={enq.message}
+                onChange={(e) => setEnq({ ...enq, message: e.target.value })}
+                rows={4}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg"
+              />
+              <Button type="submit" variant="primary" className="w-full">Send Enquiry</Button>
+            </form>
           </div>
         )}
       </Modal>

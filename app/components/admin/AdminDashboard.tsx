@@ -11,6 +11,9 @@ import { AmenitiesManager } from './AmenitiesManager';
 import { RestaurantManager } from './RestaurantManager';
 import { ContactManager } from './ContactManager';
 import { BookingsView } from './BookingsView';
+import { BarManager } from './BarManager';
+import { WineBoutiqueManager } from './WineBoutiqueManager';
+import { GalleryManager } from './GalleryManager';
 import { AdminDebugPanel } from './AdminDebugPanel';
 import { AdminErrorBoundary } from './AdminErrorBoundary';
 
@@ -42,6 +45,9 @@ export const AdminDashboard: React.FC = () => {
     { id: 'hero', label: 'Hero Section' },
     { id: 'amenities', label: 'Amenities' },
     { id: 'restaurant', label: 'Restaurant' },
+    { id: 'wine_boutique', label: 'Wine Boutique' },
+    { id: 'bar', label: 'Bar' },
+    { id: 'gallery', label: 'Gallery' },
     { id: 'contact', label: 'Contact' },
     { id: 'bookings', label: 'Bookings' }
   ];
@@ -110,6 +116,21 @@ export const AdminDashboard: React.FC = () => {
               {activeTab === 'restaurant' && (
                 <AdminErrorBoundary>
                   <RestaurantManager />
+                </AdminErrorBoundary>
+              )}
+              {activeTab === 'wine_boutique' && (
+                <AdminErrorBoundary>
+                  <WineBoutiqueManager />
+                </AdminErrorBoundary>
+              )}
+              {activeTab === 'bar' && (
+                <AdminErrorBoundary>
+                  <BarManager />
+                </AdminErrorBoundary>
+              )}
+              {activeTab === 'gallery' && (
+                <AdminErrorBoundary>
+                  <GalleryManager />
                 </AdminErrorBoundary>
               )}
               {activeTab === 'contact' && (

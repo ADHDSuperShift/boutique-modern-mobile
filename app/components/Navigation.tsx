@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
+import { useTheme } from './theme-provider';
 
 export const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const menuItems = [
     { label: 'Home', href: '#home' },
@@ -11,6 +14,7 @@ export const Navigation: React.FC = () => {
     { label: 'Restaurant', href: '#restaurant' },
     { label: 'Wine Boutique', href: '#wine' },
     { label: 'Events', href: '#events' },
+    { label: 'Gallery', href: '#gallery' },
     { label: 'Reviews', href: '#reviews' }
   ];
 
@@ -29,12 +33,34 @@ export const Navigation: React.FC = () => {
     <>
       <nav className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-slate-900 to-slate-800 backdrop-blur-md shadow-2xl border-b border-amber-400/20">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
-            Barrydale Karoo Lodge
-          </h1>
+          <button
+            onClick={() => handleClick('#home')}
+            className="flex items-center gap-3 group"
+            aria-label="Go to Home"
+          >
+            {/* Logo (replace with your final asset if needed) */}
+            <span className="relative inline-flex h-12 w-12 items-center justify-center rounded-lg ring-1 ring-amber-400/30 bg-slate-700/40 overflow-hidden">
+              <Image
+                src="/469874614_981235907371376_5422540359514130437_n.jpg"
+                alt="Site logo"
+                width={48}
+                height={48}
+                className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                priority
+              />
+            </span>
+            <span className="flex flex-col items-start leading-tight">
+              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
+                Barrydale
+              </span>
+              <span className="text-sm md:text-base text-slate-200/90 group-hover:text-amber-200 transition-colors">
+                Karoo Lodge
+              </span>
+            </span>
+          </button>
           
           {/* Desktop Navigation - Hidden on mobile */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-6">
             {menuItems.map((item) => (
               <button
                 key={item.href}
@@ -45,6 +71,15 @@ export const Navigation: React.FC = () => {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-400 to-yellow-300 transition-all duration-300 group-hover:w-full"></span>
               </button>
             ))}
+            {/* Dark mode toggle */}
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="ml-2 text-slate-200 hover:text-amber-400 transition-all duration-300 py-2 px-3 rounded-lg hover:bg-slate-700/50 border border-amber-400/30"
+              aria-label="Toggle dark mode"
+              title="Toggle dark mode"
+            >
+              {theme === 'dark' ? 'Light' : 'Dark'}
+            </button>
             
             {/* Admin Button */}
             <button
@@ -89,6 +124,17 @@ export const Navigation: React.FC = () => {
                 </button>
               </li>
             ))}
+            {/* Dark mode toggle on mobile */}
+            <li>
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="text-slate-200 text-2xl font-light hover:text-amber-400 transition-colors relative group border border-amber-400/30 px-6 py-2 rounded-lg"
+                aria-label="Toggle dark mode"
+                title="Toggle dark mode"
+              >
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </button>
+            </li>
             
             {/* Admin Button for Mobile */}
             <li>

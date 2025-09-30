@@ -17,6 +17,12 @@ type Wine = {
 };
 
 export const WineBoutique: React.FC = () => {
+  const [header, setHeader] = useState({
+    title: 'Wine Boutique',
+    subtitle: 'Curated selections',
+    description: 'Discover hand-picked wines from the Cape Winelands and beyond.',
+    backgroundImage: 'https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215824801_0c081541.webp'
+  });
   const [selectedWine, setSelectedWine] = useState<Wine | null>(null);
   const [showInquiry, setShowInquiry] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -27,6 +33,21 @@ export const WineBoutique: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
+        // Header copy
+        const { data: headerRow } = await supabase
+          .from('wine_boutique_info')
+          .select('title,subtitle,description,background_image')
+          .maybeSingle();
+        if (headerRow) {
+          setHeader(prev => ({
+            ...prev,
+            title: headerRow.title ?? prev.title,
+            subtitle: headerRow.subtitle ?? prev.subtitle,
+            description: headerRow.description ?? prev.description,
+            backgroundImage: headerRow.background_image ?? prev.backgroundImage,
+          }));
+        }
+
         const { data, error } = await supabase
           .from('wines')
           .select('*')
@@ -89,18 +110,15 @@ export const WineBoutique: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-6">
-              Wine Boutique
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-3">
+              {header.title}
             </h2>
-            <p className="text-lg text-slate-600 mb-6">
-              Celebrate the region&apos;s winemaking heritage at our boutique wine corner. Hand-picked selections 
-              from the Cape Winelands and beyond are available for tasting or to take home. Each bottle tells 
-              a story of South African terroir and craftsmanship.
-            </p>
+            <p className="text-lg text-slate-600 mb-2">{header.subtitle}</p>
+            <p className="text-lg text-slate-700">{header.description}</p>
           </div>
           <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200 hover:shadow-3xl transition-all duration-300">
             <Image 
-              src="https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215824801_0c081541.webp" 
+              src={header.backgroundImage}
               alt="Wine Boutique"
               fill
               className="object-cover"

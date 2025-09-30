@@ -19,17 +19,17 @@ export const Hero: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('hero_section')
-          .select('*')
-          .single();
-        if (!error && data) {
+          .select('title,subtitle,description,background_image,cta_text,cta_link')
+          .maybeSingle();
+    if (!error && data) {
           setHero(prev => ({
             ...prev,
             title: data.title || prev.title,
             subtitle: data.subtitle || prev.subtitle,
             description: data.description || prev.description,
-            backgroundImage: data.backgroundImage || prev.backgroundImage,
-            ctaText: data.ctaText || prev.ctaText,
-            ctaLink: data.ctaLink || prev.ctaLink,
+      backgroundImage: data.background_image || prev.backgroundImage,
+      ctaText: data.cta_text || prev.ctaText,
+      ctaLink: data.cta_link || prev.ctaLink,
           }));
         }
       } catch (_) {
