@@ -1,14 +1,29 @@
 // Seed Supabase with current static content for rooms, events, wines
 // Usage: npm run seed (requires SUPABASE_SERVICE_ROLE_KEY in .env.local)
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+// Prefer .env.local, fallback to default .env
+dotenv.config({ path: '.env.local' });
+dotenv.config();
 import { randomUUID } from 'crypto';
-import { supabaseAdmin } from '../app/lib/supabaseAdmin';
 import { rooms as staticRooms } from '../app/data/rooms';
 import { events as staticEvents } from '../app/data/events';
 import { wines as staticWines } from '../app/data/wines';
 
 const isUUID = (v: any) => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+
+// Preflight env check for clearer errors
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!url || !serviceKey) {
+  console.error('❌ Missing env: Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in .env.local');
+  process.exit(1);
+}
+
+async function getAdmin() {
+  const mod = await import('../app/lib/supabaseAdmin');
+  return mod.supabaseAdmin;
+}
 
 async function seedRooms() {
   const payload = staticRooms.map((r: any, idx: number) => ({
@@ -22,6 +37,7 @@ async function seedRooms() {
     images: r.images ?? [],
     sort_order: idx + 1,
   }));
+  const supabaseAdmin = await getAdmin();
   const { error } = await supabaseAdmin.from('rooms').upsert(payload, { onConflict: 'id' });
   if (error) throw error;
   console.log(`Seeded ${payload.length} rooms`);
@@ -37,6 +53,7 @@ async function seedEvents() {
     category: e.category ?? null,
     sort_order: idx + 1,
   }));
+  const supabaseAdmin = await getAdmin();
   const { error } = await supabaseAdmin.from('events').upsert(payload, { onConflict: 'id' });
   if (error) throw error;
   console.log(`Seeded ${payload.length} events`);
@@ -52,6 +69,7 @@ async function seedWines() {
     region: w.region ?? null,
     sort_order: idx + 1,
   }));
+  const supabaseAdmin = await getAdmin();
   const { error } = await supabaseAdmin.from('wines').upsert(payload, { onConflict: 'id' });
   if (error) throw error;
   console.log(`Seeded ${payload.length} wines`);
