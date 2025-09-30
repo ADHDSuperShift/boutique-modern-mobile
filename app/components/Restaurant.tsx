@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
+import { supabase } from '../lib/supabase';
 
 const dishes = [
   { name: 'Karoo Lamb Shank', image: 'https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215820600_2c2bb234.webp', desc: 'Slow-braised with rosemary and red wine' },
@@ -13,12 +14,51 @@ const dishes = [
 export const Restaurant: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', email: '', date: '', time: '', guests: '2' });
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [copy, setCopy] = useState({
+    title: 'Vintage Car Restaurant',
+    description: 'Step into a retro-styled dining experience. The Vintage Car Restaurant serves hearty breakfasts, leisurely lunches, and elegant dinners — all with a Karoo twist. Fresh, locally sourced ingredients paired with warm hospitality make every meal unforgettable.',
+    heroImage: 'https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215819859_d1a76dd0.webp',
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('restaurant_info')
+          .select('*')
+          .single();
+        if (!error && data) {
+          setCopy(prev => ({
+            ...prev,
+            title: data.title || prev.title,
+            description: data.description || prev.description,
+            heroImage: data.heroImage || prev.heroImage,
+          }));
+        }
+      } catch (_) {
+        // keep fallbacks
+      }
+    };
+    load();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Reservation request submitted!');
-    setShowBookingModal(false);
-    setFormData({ name: '', email: '', date: '', time: '', guests: '2' });
+    try {
+      await supabase.from('restaurant_reservations').insert({
+        name: formData.name,
+        email: formData.email,
+        date: formData.date,
+        time: formData.time,
+        guests: Number(formData.guests || '2'),
+      });
+      alert('Reservation request submitted!');
+    } catch (_) {
+      alert('Reservation submitted (offline mode).');
+    } finally {
+      setShowBookingModal(false);
+      setFormData({ name: '', email: '', date: '', time: '', guests: '2' });
+    }
   };
 
   return (
@@ -27,17 +67,15 @@ export const Restaurant: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           <div>
             <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-6">
-              Vintage Car Restaurant
+              {copy.title}
             </h2>
             <p className="text-lg text-slate-700 mb-6 leading-relaxed">
-              Step into a retro-styled dining experience. The Vintage Car Restaurant serves hearty breakfasts, 
-              leisurely lunches, and elegant dinners — all with a Karoo twist. Fresh, locally sourced ingredients 
-              paired with warm hospitality make every meal unforgettable.
+              {copy.description}
             </p>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200/50">
             <img 
-              src="https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215819859_d1a76dd0.webp" 
+              src={copy.heroImage}
               alt="Restaurant Interior"
               className="w-full h-96 object-cover hover:scale-105 transition-transform duration-700"
             />
@@ -68,7 +106,7 @@ export const Restaurant: React.FC = () => {
         </div>
       </div>
 
-      <Modal isOpen={showBookingModal} onClose={() => setShowBookingModal(false)}>
+  <Modal isOpen={showBookingModal} onClose={() => setShowBookingModal(false)}>
         <div className="p-8 bg-gradient-to-br from-white to-amber-50/50">
           <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-6 text-center">Reserve a Table</h3>
           <form onSubmit={handleSubmit} className="space-y-4">

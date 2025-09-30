@@ -10,7 +10,8 @@
     "setup": "./setup-env.sh",
     "deploy": "./deploy.sh",
     "vercel:env": "vercel env pull .env.local",
-    "supabase:types": "npx supabase gen types typescript --project-id=YOUR_PROJECT_ID > app/lib/database.types.ts"
+    "supabase:types": "npx supabase gen types typescript --project-id=YOUR_PROJECT_ID > app/lib/database.types.ts",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

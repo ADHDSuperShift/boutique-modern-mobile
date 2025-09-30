@@ -57,6 +57,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             Email: admin@demo.com<br/>
             Password: demo123
           </p>
+          <p className="text-xs mt-2 text-amber-700">
+            Note: Demo login is UI-only. It does not create a Supabase session, so protected actions like image uploads will fail. Use your real Supabase admin credentials to manage content.
+          </p>
         </div>
         
         {error && (

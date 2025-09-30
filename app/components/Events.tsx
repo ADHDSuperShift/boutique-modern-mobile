@@ -1,12 +1,61 @@
 'use client';
 
-import React, { useState } from 'react';
-import { events } from '../data/events';
+import React, { useEffect, useState } from 'react';
+import { events as fallbackEvents } from '../data/events';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
+import { supabase } from '../lib/supabase';
+
+type EventItem = {
+  id: string;
+  title: string;
+  date: string;
+  image: string;
+  description: string;
+  category: string;
+};
 
 export const Events: React.FC = () => {
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+  const [items, setItems] = useState<EventItem[]>(fallbackEvents as unknown as EventItem[]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('sort_order', { ascending: true, nullsFirst: false })
+          .order('date', { ascending: true });
+        if (!error && data) {
+          setItems(
+            data.map((e: any) => ({
+              id: e.id,
+              title: e.title,
+              date: e.date,
+              image: e.image,
+              description: e.description,
+              category: e.category,
+            }))
+          );
+        }
+      } catch (_) {
+        // use fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50">
+        <div className="container mx-auto px-4 text-center text-slate-600">Loading…</div>
+      </section>
+    );
+  }
 
   return (
     <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50">
@@ -22,7 +71,7 @@ export const Events: React.FC = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {events.map((event) => (
+          {items.map((event) => (
             <div 
               key={event.id} 
               className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 overflow-hidden hover:shadow-2xl hover:ring-amber-300 transition-all cursor-pointer transform hover:scale-105 backdrop-blur-sm"

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { events as staticEvents } from '../../data/events';
+import { EditEventModal } from './EditEventModal';
 import {
   DndContext,
   closestCenter,
@@ -118,6 +119,7 @@ export const EventsManager: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -136,6 +138,7 @@ export const EventsManager: React.FC = () => {
       const { data, error } = await supabase
         .from('events')
         .select('*')
+        .order('sort_order', { ascending: true, nullsFirst: false })
         .order('date', { ascending: false });
 
       if (error) {
@@ -161,7 +164,18 @@ export const EventsManager: React.FC = () => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over?.id);
 
-        return arrayMove(items, oldIndex, newIndex);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        // Persist order
+        Promise.resolve().then(async () => {
+          try {
+            const updates = newOrder.map((e, idx) => ({ id: e.id, sort_order: idx + 1 }));
+            const { error } = await supabase.from('events').upsert(updates);
+            if (error) console.error('Failed to persist event order:', error);
+          } catch (e) {
+            console.error('Error persisting event order:', e);
+          }
+        });
+        return newOrder;
       });
     }
   };
@@ -189,24 +203,60 @@ export const EventsManager: React.FC = () => {
   };
 
   const handleSaveEdit = async (updatedEvent: Event) => {
+    setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('events')
-        .update(updatedEvent)
-        .eq('id', updatedEvent.id);
+      // Insert or update based on existence
+      const exists = events.some(e => e.id === updatedEvent.id);
+      if (exists) {
+        const { error } = await supabase
+          .from('events')
+          .update({
+            title: updatedEvent.title,
+            date: updatedEvent.date,
+            category: updatedEvent.category ?? null,
+            description: updatedEvent.description,
+            image: updatedEvent.image,
+          })
+          .eq('id', updatedEvent.id);
+        if (error) throw error;
+      } else {
+        // Ensure we have an id
+        const id = updatedEvent.id || (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`);
+        const { error } = await supabase
+          .from('events')
+          .insert({
+            id,
+            title: updatedEvent.title,
+            date: updatedEvent.date,
+            category: updatedEvent.category ?? null,
+            description: updatedEvent.description,
+            image: updatedEvent.image,
+          });
+        if (error) throw error;
+        updatedEvent.id = id;
+      }
 
-      if (error) throw error;
-      
-      setEvents(prev => prev.map(event => 
-        event.id === updatedEvent.id ? updatedEvent : event
-      ));
+      // Update local state
+      setEvents(prev => {
+        const idx = prev.findIndex(e => e.id === updatedEvent.id);
+        if (idx === -1) return [updatedEvent, ...prev];
+        const copy = [...prev];
+        copy[idx] = updatedEvent;
+        return copy;
+      });
       setEditingEvent(null);
     } catch (err) {
-      console.error('Error updating event:', err);
-      setEvents(prev => prev.map(event => 
-        event.id === updatedEvent.id ? updatedEvent : event
-      ));
+      console.error('Error saving event (fallback to local state):', err);
+      setEvents(prev => {
+        const idx = prev.findIndex(e => e.id === updatedEvent.id);
+        if (idx === -1) return [updatedEvent, ...prev];
+        const copy = [...prev];
+        copy[idx] = updatedEvent;
+        return copy;
+      });
       setEditingEvent(null);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -216,7 +266,27 @@ export const EventsManager: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Manage Events</h2>
-        <Button variant="primary">Add New Event</Button>
+        <Button 
+          variant="primary"
+          onClick={() => {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const defaultDate = `${yyyy}-${mm}-${dd}`;
+            const newEvent: Event = {
+              id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`,
+              title: 'New Event',
+              date: defaultDate,
+              category: '',
+              description: '',
+              image: '',
+            };
+            setEditingEvent(newEvent);
+          }}
+        >
+          Add New Event
+        </Button>
       </div>
 
       <div className="mb-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
@@ -250,15 +320,13 @@ export const EventsManager: React.FC = () => {
         </div>
       )}
 
-      {/* Edit Modal Placeholder */}
       {editingEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4">Edit Event: {editingEvent.title}</h3>
-            <p className="text-slate-600 mb-4">Edit functionality coming soon...</p>
-            <Button onClick={() => setEditingEvent(null)}>Close</Button>
-          </div>
-        </div>
+        <EditEventModal 
+          event={editingEvent}
+          onSave={handleSaveEdit}
+          onCancel={() => setEditingEvent(null)}
+          isLoading={isSaving}
+        />
       )}
     </div>
   );

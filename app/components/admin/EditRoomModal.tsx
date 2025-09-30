@@ -23,6 +23,8 @@ interface EditRoomModalProps {
 }
 
 export const EditRoomModal: React.FC<EditRoomModalProps> = ({ room, onSave, onCancel, isLoading = false }) => {
+  console.log('🔧 EditRoomModal rendering with room:', room);
+  
   const [formData, setFormData] = useState<Room>(room);
 
   const handleSubmit = (e: React.FormEvent) => {

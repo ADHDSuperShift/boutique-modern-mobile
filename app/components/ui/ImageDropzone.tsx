@@ -51,12 +51,14 @@ export const ImageDropzone: React.FC<ImageDropzoneProps> = ({
         });
 
       if (error) {
-        console.error('❌ Supabase Storage error:', error.message);
-        // Fallback to preview URL for demo
+        console.error('❌ Supabase Storage error:', error);
+        // Fallback to preview URL for demo and surface actionable hint
         const previewUrl = URL.createObjectURL(file);
         setPreview(previewUrl);
         onImageUpload(previewUrl);
-        alert('⚠️ Storage bucket not ready yet - using preview. Check MANUAL_FIX.md');
+        alert(
+          `⚠️ Upload blocked: ${error.message}\n\nQuick fixes:\n• Ensure bucket 'site-images' exists and is public\n• Ensure you are signed in as admin and then sign out/in to refresh JWT\n• Run migration-storage-bucket.sql in Supabase SQL Editor\n\nSee MANUAL_FIX.md`
+        );
         return;
       }
 

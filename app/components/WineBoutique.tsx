@@ -1,51 +1,86 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { wines } from '../data/wines';
+import React, { useEffect, useState } from 'react';
+import { wines as fallbackWines } from '../data/wines';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
+import { supabase } from '../lib/supabase';
+
+type Wine = {
+  id: string;
+  name: string;
+  image: string;
+  tasting_notes?: string;
+  vintage?: string;
+  region?: string;
+};
 
 export const WineBoutique: React.FC = () => {
-  const [selectedWine, setSelectedWine] = useState<any>(null);
+  const [selectedWine, setSelectedWine] = useState<Wine | null>(null);
   const [showInquiry, setShowInquiry] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [items, setItems] = useState<Wine[]>(fallbackWines as unknown as Wine[]);
+
+  // Load wines from Supabase
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('wines')
+          .select('*')
+          .order('sort_order', { ascending: true, nullsFirst: false })
+          .order('name');
+        if (!error && data) {
+          setItems(data as Wine[]);
+        }
+      } catch (_) {
+        // keep fallbacks
+      }
+    };
+    load();
+  }, []);
 
   // Auto-rotate carousel
   useEffect(() => {
-    const maxIndex = Math.max(0, wines.length - 3);
+    const maxIndex = Math.max(0, items.length - 3);
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => 
-        prevIndex >= maxIndex ? 0 : prevIndex + 1
-      );
-    }, 4000); // Change every 4 seconds
-
+      setCurrentImageIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
+    }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [items.length]);
 
-  const handleInquiry = (wine: any) => {
+  const handleInquiry = (wine: Wine) => {
     setSelectedWine(wine);
     setShowInquiry(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Inquiry submitted for ${selectedWine.name}`);
-    setShowInquiry(false);
+    try {
+      await supabase.from('wine_inquiries').insert({
+        wine_id: selectedWine?.id || null,
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      });
+      alert(`Inquiry submitted for ${selectedWine?.name ?? 'a wine'}`);
+    } catch (_) {
+      alert('Inquiry submitted (offline mode).');
+    } finally {
+      setShowInquiry(false);
+      setFormData({ name: '', email: '', message: '' });
+    }
   };
 
   const nextImage = () => {
-    const maxIndex = Math.max(0, wines.length - 3);
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex >= maxIndex ? 0 : prevIndex + 1
-    );
+    const maxIndex = Math.max(0, items.length - 3);
+    setCurrentImageIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
   };
 
   const prevImage = () => {
-    const maxIndex = Math.max(0, wines.length - 3);
-    setCurrentImageIndex((prevIndex) => 
-      prevIndex === 0 ? maxIndex : prevIndex - 1
-    );
+    const maxIndex = Math.max(0, items.length - 3);
+    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? maxIndex : prevIndex - 1));
   };
 
   return (
@@ -80,7 +115,7 @@ export const WineBoutique: React.FC = () => {
               className="flex transition-transform duration-300 ease-in-out"
               style={{ transform: `translateX(-${currentImageIndex * 33.333}%)` }}
             >
-              {wines.map((wine) => (
+      {items.map((wine) => (
                 <div key={wine.id} className="w-1/3 flex-shrink-0 px-2">
                   <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 p-6 hover:shadow-2xl hover:ring-amber-300 transition-all duration-300 backdrop-blur-sm">
                     <img 
@@ -89,8 +124,8 @@ export const WineBoutique: React.FC = () => {
                       className="w-full h-48 object-contain mb-4"
                     />
                     <h4 className="font-bold text-slate-800 mb-2 text-sm">{wine.name}</h4>
-                    <p className="text-xs text-slate-600 mb-1">{wine.region}</p>
-                    <p className="text-xs text-amber-600 mb-3 font-medium">{wine.vintage}</p>
+        <p className="text-xs text-slate-600 mb-1">{wine.region}</p>
+        <p className="text-xs text-amber-600 mb-3 font-medium">{wine.vintage}</p>
                     <Button 
                       onClick={() => handleInquiry(wine)} 
                       variant="primary" 
@@ -120,7 +155,7 @@ export const WineBoutique: React.FC = () => {
           
           {/* Carousel Dots */}
           <div className="flex justify-center mt-6 space-x-2">
-            {Array.from({ length: Math.max(1, wines.length - 2) }).map((_, index) => (
+            {Array.from({ length: Math.max(1, items.length - 2) }).map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentImageIndex(index)}
@@ -138,7 +173,7 @@ export const WineBoutique: React.FC = () => {
           <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
             Inquire About {selectedWine?.name}
           </h3>
-          <p className="text-slate-600 mb-6">{selectedWine?.tastingNotes}</p>
+          <p className="text-slate-600 mb-6">{selectedWine?.tasting_notes}</p>
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"

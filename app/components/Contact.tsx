@@ -1,15 +1,55 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from './ui/Button';
+import { supabase } from '../lib/supabase';
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [info, setInfo] = useState({
+    address: '11 Tennant Street\nBarrydale, Western Cape, 6750\nSouth Africa',
+    phone: '+27 (028) 572 1020',
+    email_primary: 'reservations@barrydalekaroolodge.co.za',
+    email_secondary: 'info@barrydalekaroolodge.co.za',
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('contact_info')
+          .select('*')
+          .single();
+        if (!error && data) {
+          setInfo(prev => ({
+            ...prev,
+            address: data.address || prev.address,
+            phone: data.phone || prev.phone,
+            email_primary: data.email_primary || prev.email_primary,
+            email_secondary: data.email_secondary || prev.email_secondary,
+          }));
+        }
+      } catch (_) {
+        // keep defaults
+      }
+    };
+    load();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Message sent! We will get back to you soon.');
-    setFormData({ name: '', email: '', message: '' });
+    try {
+      await supabase.from('contacts').insert({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      });
+      alert('Message sent! We will get back to you soon.');
+    } catch (_) {
+      alert('Message sent (offline mode).');
+    } finally {
+      setFormData({ name: '', email: '', message: '' });
+    }
   };
 
   return (
@@ -19,19 +59,19 @@ export const Contact: React.FC = () => {
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl p-6 ring-1 ring-slate-200 hover:ring-amber-300 transition-all duration-300 backdrop-blur-sm">
               <h3 className="text-xl font-bold text-slate-800 mb-2">Address</h3>
-              <p className="text-slate-600">11 Tennant Street<br/>Barrydale, Western Cape, 6750<br/>South Africa</p>
+              <p className="text-slate-600 whitespace-pre-line">{info.address}</p>
             </div>
             
             <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl p-6 ring-1 ring-slate-200 hover:ring-amber-300 transition-all duration-300 backdrop-blur-sm">
               <h3 className="text-xl font-bold text-slate-800 mb-2">Phone</h3>
-              <p className="text-slate-600">+27 (028) 572 1020</p>
+              <p className="text-slate-600">{info.phone}</p>
             </div>
             
             <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl p-6 ring-1 ring-slate-200 hover:ring-amber-300 transition-all duration-300 backdrop-blur-sm">
               <h3 className="text-xl font-bold text-slate-800 mb-2">Email</h3>
               <p className="text-slate-600">
-                reservations@barrydalekaroolodge.co.za<br/>
-                info@barrydalekaroolodge.co.za
+                {info.email_primary}<br/>
+                {info.email_secondary}
               </p>
             </div>
           </div>

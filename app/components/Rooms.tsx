@@ -1,18 +1,63 @@
 'use client';
 
-import React, { useState } from 'react';
-import { rooms } from '../data/rooms';
+import React, { useEffect, useMemo, useState } from 'react';
+import { rooms as fallbackRooms } from '../data/rooms';
 import { RoomCard } from './RoomCard';
 import { RoomModal } from './RoomModal';
 import { BookingModal } from './BookingModal';
+import { supabase } from '../lib/supabase';
+
+export type PublicRoom = {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
+  short_description?: string;
+  image: string;
+  images?: string[];
+  amenities?: string[];
+};
 
 export const Rooms: React.FC = () => {
-  const [selectedRoom, setSelectedRoom] = useState<any>(null);
+  const [selectedRoom, setSelectedRoom] = useState<PublicRoom | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
   const [bookingRoom, setBookingRoom] = useState<string>('');
+  const [items, setItems] = useState<PublicRoom[]>(fallbackRooms as unknown as PublicRoom[]);
+  const [loading, setLoading] = useState(true);
 
-  const handleDetails = (room: any) => {
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('rooms')
+          .select('*')
+          .order('sort_order', { ascending: true, nullsFirst: false })
+          .order('name');
+        if (!error && data) {
+          setItems(
+            data.map((r: any) => ({
+              id: r.id,
+              name: r.name,
+              type: r.type,
+              description: r.description,
+              short_description: r.short_description,
+              image: r.image,
+              images: r.images || (r.image ? [r.image] : []),
+              amenities: Array.isArray(r.amenities) ? r.amenities : [],
+            }))
+          );
+        }
+      } catch (_) {
+        // keep fallbacks
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const handleDetails = (room: PublicRoom) => {
     setSelectedRoom(room);
     setShowDetails(true);
   };
@@ -22,6 +67,14 @@ export const Rooms: React.FC = () => {
     setShowBooking(true);
     setShowDetails(false);
   };
+
+  if (loading) {
+    return (
+      <section id="rooms" className="py-20 bg-gradient-to-b from-amber-50/30 to-slate-50">
+        <div className="container mx-auto px-4 text-center text-slate-600">Loading…</div>
+      </section>
+    );
+  }
 
   return (
     <section id="rooms" className="py-20 bg-gradient-to-b from-amber-50/30 to-slate-50">
@@ -36,7 +89,7 @@ export const Rooms: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {rooms.map((room) => (
+          {items.map((room) => (
             <RoomCard
               key={room.id}
               room={room}
@@ -51,7 +104,7 @@ export const Rooms: React.FC = () => {
         room={selectedRoom}
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
-        onBook={() => handleBook(selectedRoom?.name)}
+        onBook={() => selectedRoom && handleBook(selectedRoom.name)}
       />
 
       <BookingModal

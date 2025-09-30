@@ -1,47 +1,57 @@
-# 🔥 UNIVERSAL IMAGE UPLOAD - NO MORE SQL ERRORS
+# Fix: "Storage bucket not ready yet - using preview"
 
-## Step 1: Create Universal Storage Bucket (2 minutes)
+Follow these steps to enable real uploads to Supabase Storage instead of the temporary preview fallback.
 
-1. Go to: https://supabase.com/dashboard/project/edcajrnioxdzzoxeylhu/storage/buckets
+## 1) Create or verify the bucket
 
-2. Click **"New Bucket"** button
+1. Open your Supabase project Storage → Buckets:
+   https://supabase.com/dashboard/project/edcajrnioxdzzoxeylhu/storage/buckets
+2. If missing, create a bucket named `site-images` with Public on.
+3. If it already exists, open it and confirm: Public = On.
 
-3. Fill in:
-   - **Name**: `site-images` 
-   - **Public**: ✅ YES (check this box)
-   - **File size limit**: 50MB
-   - **Allowed mime types**: Leave blank (allows all)
+## 2) Apply correct policies (fastest: run the SQL)
 
-4. Click **"Create Bucket"**
+Run this file in Supabase SQL Editor: `migration-storage-bucket.sql`.
+It will ensure the bucket exists and the policies below are set idempotently:
 
-## Step 2: Set Policies (30 seconds)
+- Public read of objects in bucket `site-images`
+- Admin-only write/update/delete (based on JWT role)
 
-1. Click on your new `site-images` bucket
+If you prefer UI, the policies must match:
+- SELECT: `bucket_id = 'site-images'`
+- INSERT/UPDATE/DELETE (to authenticated): `bucket_id = 'site-images' AND auth.jwt()->>'role' = 'admin'`
 
-2. Go to **"Policies"** tab
+## 3) Ensure your admin role is on your user
 
-3. Click **"New Policy"** 
+Run the block at the end of `supabase-schema-complete.sql` to set admin role for:
 
-4. Choose **"Custom"** and paste:
-   ```sql
-   bucket_id = 'site-images'
-   ```
+- Email: `dirkawspy@gmail.com`
 
-5. Check **"SELECT"** and **"INSERT"** boxes
+After running, sign out of the website and sign back in to refresh your JWT so `role=admin` is present in the token.
 
-6. Click **"Save"**
+## 4) Check your env configuration
 
-## Step 3: Test ALL Image Uploads (immediate)
+Make sure the browser client has valid environment variables:
 
-### ✅ **ROOMS**: Admin → Rooms → Edit → Drag images (stored in `/rooms/` folder)
-### ✅ **EVENTS**: Admin → Events → Edit → Drag images (stored in `/events/` folder)  
-### ✅ **WINES**: Admin → Wines → Edit → Drag images (stored in `/wines/` folder)
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-## What You Get:
+They should point to this project (the code also has working defaults for your project id).
 
-🎯 **Universal drag-and-drop** for ALL images on your site
-📁 **Organized folders** (rooms/, events/, wines/)
-💾 **Permanent storage** - images persist across page refreshes
-🔄 **Graceful fallbacks** - still works even if storage fails
+Optional for local scripts only (not required in browser):
 
-**DONE. EVERY FUCKING IMAGE ON YOUR SITE NOW HAS DRAG & DROP! 🎉**
+- `SUPABASE_SERVICE_ROLE_KEY` for seeding or admin scripts.
+
+## 5) Retry an upload
+
+Go to Admin → any section with an image field → drag a new image.
+If an error occurs, the uploader will show a precise hint (bucket, policy, or auth).
+
+## Quick verify checklist
+
+- Storage → Buckets has `site-images` and it’s Public.
+- SQL policies exist on `storage.objects` exactly as in `migration-storage-bucket.sql`.
+- Your user has `role=admin` in app_metadata and you re-signed in.
+- Upload works, and the image URL returned starts with `https://edcajrnioxdzzoxeylhu.supabase.co/storage/v1/object/public/site-images/…`
+
+If still blocked, copy the exact error message surfaced in the upload alert and I’ll pinpoint the fix.

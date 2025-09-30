@@ -135,6 +135,7 @@ export const RoomsManager: React.FC = () => {
       const { data, error } = await supabase
         .from('rooms')
         .select('*')
+        .order('sort_order', { ascending: true, nullsFirst: false })
         .order('name');
 
       if (error) {
@@ -161,10 +162,16 @@ export const RoomsManager: React.FC = () => {
         const newIndex = items.findIndex((item) => item.id === over?.id);
 
         const newOrder = arrayMove(items, oldIndex, newIndex);
-        
-        // Here you could update the order in Supabase
-        // updateRoomOrder(newOrder);
-        
+        // Persist new sort_order in DB (best effort)
+        Promise.resolve().then(async () => {
+          try {
+            const updates = newOrder.map((r, idx) => ({ id: r.id, sort_order: idx + 1 }));
+            const { error } = await supabase.from('rooms').upsert(updates);
+            if (error) console.error('Failed to persist room order:', error);
+          } catch (e) {
+            console.error('Error persisting room order:', e);
+          }
+        });
         return newOrder;
       });
     }
@@ -191,10 +198,16 @@ export const RoomsManager: React.FC = () => {
   const handleEdit = (room: Room) => {
     console.log('🔧 Opening edit modal for room:', room);
     console.log('🔧 Current editingRoom state:', editingRoom);
+    console.log('🔧 Window location:', window.location.href);
     
     // Ensure we create a fresh copy to avoid reference issues
     const roomCopy = { ...room };
     setEditingRoom(roomCopy);
+    
+    // Force a small delay to ensure state updates
+    setTimeout(() => {
+      console.log('🔧 After timeout - editingRoom state:', roomCopy);
+    }, 100);
   };
 
   const handleSaveEdit = async (updatedRoom: Room) => {
@@ -290,13 +303,49 @@ export const RoomsManager: React.FC = () => {
 
       {/* Edit Modal */}
       {editingRoom && (
-        <EditRoomModal
-          room={editingRoom}
-          onSave={handleSaveEdit}
-          onCancel={handleCancelEdit}
-          isLoading={isModalLoading}
-        />
+        <>
+          {/* Debug indicator */}
+          <div 
+            style={{
+              position: 'fixed',
+              top: '10px',
+              left: '10px',
+              zIndex: 10000,
+              backgroundColor: 'red',
+              color: 'white',
+              padding: '10px',
+              borderRadius: '5px'
+            }}
+          >
+            Edit Modal Active: {editingRoom.name}
+          </div>
+          
+          <EditRoomModal
+            room={editingRoom}
+            onSave={handleSaveEdit}
+            onCancel={handleCancelEdit}
+            isLoading={isModalLoading}
+          />
+        </>
       )}
+
+      {/* Debug panel */}
+      <div 
+        style={{
+          position: 'fixed',
+          bottom: '10px',
+          right: '10px',
+          zIndex: 10000,
+          backgroundColor: 'blue',
+          color: 'white',
+          padding: '10px',
+          borderRadius: '5px',
+          fontSize: '12px'
+        }}
+      >
+        Editing: {editingRoom ? editingRoom.name : 'None'}<br/>
+        Total Rooms: {rooms.length}
+      </div>
     </div>
   );
 };

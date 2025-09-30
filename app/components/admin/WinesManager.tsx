@@ -132,6 +132,7 @@ export const WinesManager: React.FC = () => {
       const { data, error } = await supabase
         .from('wines')
         .select('*')
+        .order('sort_order', { ascending: true, nullsFirst: false })
         .order('name');
 
       if (error) {
@@ -157,7 +158,18 @@ export const WinesManager: React.FC = () => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over?.id);
 
-        return arrayMove(items, oldIndex, newIndex);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        // Persist order
+        Promise.resolve().then(async () => {
+          try {
+            const updates = newOrder.map((w, idx) => ({ id: w.id, sort_order: idx + 1 }));
+            const { error } = await supabase.from('wines').upsert(updates);
+            if (error) console.error('Failed to persist wine order:', error);
+          } catch (e) {
+            console.error('Error persisting wine order:', e);
+          }
+        });
+        return newOrder;
       });
     }
   };

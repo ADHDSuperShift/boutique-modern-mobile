@@ -1,14 +1,9 @@
 import React from 'react';
 import { Button } from './ui/Button';
+import type { PublicRoom } from './Rooms';
 
 interface RoomCardProps {
-  room: {
-    id: string;
-    name: string;
-    type: string;
-    shortDesc: string;
-    image: string;
-  };
+  room: PublicRoom;
   onDetails: () => void;
   onBook: () => void;
 }
@@ -28,7 +23,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onDetails, onBook }) =
       </div>
       <div className="p-6">
         <h3 className="text-2xl font-bold text-slate-800 mb-2">{room.name}</h3>
-        <p className="text-slate-600 mb-4 line-clamp-2">{room.shortDesc}</p>
+        <p className="text-slate-600 mb-4 line-clamp-2">{room.short_description || ''}</p>
         <div className="flex gap-3">
           <Button onClick={onBook} variant="primary" className="flex-1">
             Book Now

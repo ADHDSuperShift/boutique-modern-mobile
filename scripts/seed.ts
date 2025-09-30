@@ -1,0 +1,72 @@
+// Seed Supabase with current static content for rooms, events, wines
+// Usage: npm run seed (requires SUPABASE_SERVICE_ROLE_KEY in .env.local)
+
+import 'dotenv/config';
+import { randomUUID } from 'crypto';
+import { supabaseAdmin } from '../app/lib/supabaseAdmin';
+import { rooms as staticRooms } from '../app/data/rooms';
+import { events as staticEvents } from '../app/data/events';
+import { wines as staticWines } from '../app/data/wines';
+
+const isUUID = (v: any) => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+
+async function seedRooms() {
+  const payload = staticRooms.map((r: any, idx: number) => ({
+    id: isUUID(r.id) ? r.id : randomUUID(),
+    name: r.name,
+    type: r.type,
+    description: r.description,
+    short_description: r.shortDesc ?? r.short_description ?? '',
+    amenities: r.amenities ?? [],
+    image: r.image,
+    images: r.images ?? [],
+    sort_order: idx + 1,
+  }));
+  const { error } = await supabaseAdmin.from('rooms').upsert(payload, { onConflict: 'id' });
+  if (error) throw error;
+  console.log(`Seeded ${payload.length} rooms`);
+}
+
+async function seedEvents() {
+  const payload = staticEvents.map((e: any, idx: number) => ({
+    id: isUUID(e.id) ? e.id : randomUUID(),
+    title: e.title,
+    date: e.date,
+    description: e.description,
+    image: e.image,
+    category: e.category ?? null,
+    sort_order: idx + 1,
+  }));
+  const { error } = await supabaseAdmin.from('events').upsert(payload, { onConflict: 'id' });
+  if (error) throw error;
+  console.log(`Seeded ${payload.length} events`);
+}
+
+async function seedWines() {
+  const payload = staticWines.map((w: any, idx: number) => ({
+    id: isUUID(w.id) ? w.id : randomUUID(),
+    name: w.name,
+    image: w.image,
+    tasting_notes: w.tastingNotes ?? null,
+    vintage: w.vintage ?? null,
+    region: w.region ?? null,
+    sort_order: idx + 1,
+  }));
+  const { error } = await supabaseAdmin.from('wines').upsert(payload, { onConflict: 'id' });
+  if (error) throw error;
+  console.log(`Seeded ${payload.length} wines`);
+}
+
+async function main() {
+  try {
+    await seedRooms();
+    await seedEvents();
+    await seedWines();
+    console.log('✅ Seeding complete');
+  } catch (err) {
+    console.error('❌ Seeding failed:', err);
+    process.exit(1);
+  }
+}
+
+main();
