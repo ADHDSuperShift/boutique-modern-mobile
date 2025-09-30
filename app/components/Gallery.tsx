@@ -39,6 +39,8 @@ export const Gallery: React.FC = () => {
     load();
   }, []);
 
+  const validImages = images.filter(Boolean);
+
   return (
     <section id="gallery" className="py-16 bg-slate-50 dark:bg-slate-900/40">
       <div className="container mx-auto px-4">
@@ -46,7 +48,7 @@ export const Gallery: React.FC = () => {
           {title}
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {images.map((src, i) => (
+          {validImages.map((src, i) => (
             <div key={i} className="relative aspect-[4/3] rounded-xl overflow-hidden shadow ring-1 ring-slate-200 dark:ring-slate-700">
               <Image src={src} alt={`Gallery ${i+1}`} fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover hover:scale-105 transition-transform duration-700" />
             </div>
