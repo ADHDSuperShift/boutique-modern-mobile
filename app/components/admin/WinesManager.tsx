@@ -144,7 +144,15 @@ export const WinesManager: React.FC = () => {
         // Fallback to static data if Supabase fails
         setWines(staticWines);
       } else {
-        setWines(data || staticWines);
+        const mapped = (data || []).map((w: any) => ({
+          id: w.id,
+          name: w.name ?? '',
+          region: w.region ?? '',
+          vintage: w.vintage ?? '',
+          price: w.price == null ? undefined : Number(w.price),
+          image: w.image ?? '',
+        } as Wine));
+        setWines(mapped.length ? mapped : staticWines);
       }
     } catch (err) {
       console.error('Error fetching wines:', err);
@@ -164,12 +172,15 @@ export const WinesManager: React.FC = () => {
         const newIndex = items.findIndex((item) => item.id === over?.id);
 
         const newOrder = arrayMove(items, oldIndex, newIndex);
-        // Persist order
         Promise.resolve().then(async () => {
           try {
             const updates = newOrder.map((w, idx) => ({ id: w.id, sort_order: idx + 1 }));
-            const { error } = await supabase.from('wines').upsert(updates);
-            if (error) console.error('Failed to persist wine order:', error);
+            const res = await fetch('/api/admin/wines/reorder', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ order: updates })
+            });
+            if (!res.ok) console.error('Failed to persist wine order:', await res.json());
           } catch (e) {
             console.error('Error persisting wine order:', e);
           }
@@ -183,12 +194,12 @@ export const WinesManager: React.FC = () => {
     if (!confirm('Are you sure you want to delete this wine?')) return;
 
     try {
-      const { error } = await supabase
-        .from('wines')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      const res = await fetch('/api/admin/wines/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Delete failed');
       fetchWines();
     } catch (err) {
       console.error('Error deleting wine:', err);
@@ -203,15 +214,32 @@ export const WinesManager: React.FC = () => {
 
   const handleSaveEdit = async (updatedWine: Wine) => {
     try {
-      const { error } = await supabase
-        .from('wines')
-        .update(updatedWine)
-        .eq('id', updatedWine.id);
+      const existing = wines.find(w => w.id === updatedWine.id);
+      const merged: Wine = {
+        id: updatedWine.id || existing?.id || (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`),
+        name: updatedWine.name || existing?.name || 'Untitled Wine',
+        region: updatedWine.region || existing?.region || '',
+        vintage: updatedWine.vintage || existing?.vintage || '',
+        price: typeof updatedWine.price === 'number' ? updatedWine.price : existing?.price,
+        image: updatedWine.image ?? existing?.image ?? '',
+      };
 
-      if (error) throw error;
-      
+      const payload = {
+        name: merged.name,
+        region: merged.region,
+        vintage: merged.vintage,
+        image: merged.image || null,
+      } as const;
+
+      const res = await fetch('/api/admin/wines/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: merged.id, payload })
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
+
       setWines(prev => prev.map(wine => 
-        wine.id === updatedWine.id ? updatedWine : wine
+        wine.id === merged.id ? merged : wine
       ));
       setEditingWine(null);
     } catch (err) {

@@ -18,7 +18,7 @@ export const Restaurant: React.FC = () => {
   const [copy, setCopy] = useState({
     title: 'Vintage Car Restaurant',
     description: 'Step into a retro-styled dining experience. The Vintage Car Restaurant serves hearty breakfasts, leisurely lunches, and elegant dinners — all with a Karoo twist. Fresh, locally sourced ingredients paired with warm hospitality make every meal unforgettable.',
-    heroImage: 'https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215819859_d1a76dd0.webp',
+  heroImage: 'https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215819859_d1a76dd0.webp',
   });
 
   useEffect(() => {
@@ -28,12 +28,13 @@ export const Restaurant: React.FC = () => {
           .from('restaurant_info')
           .select('*')
           .single();
-        if (!error && data) {
+    if (!error && data) {
           setCopy(prev => ({
             ...prev,
             title: data.title || prev.title,
             description: data.description || prev.description,
-            heroImage: data.heroImage || prev.heroImage,
+      // Accept either backgroundImage (admin saves) or legacy heroImage
+      heroImage: data.backgroundImage || data.heroImage || prev.heroImage,
           }));
         }
       } catch (_) {
@@ -73,6 +74,13 @@ export const Restaurant: React.FC = () => {
             <p className="text-lg text-slate-700 mb-6 leading-relaxed">
               {copy.description}
             </p>
+            <Button 
+              onClick={() => setShowBookingModal(true)}
+              variant="primary" 
+              className="px-8 py-4 text-lg shadow-2xl"
+            >
+              Reserve a Table
+            </Button>
           </div>
           <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200/50 relative h-96">
             <Image 
@@ -99,16 +107,6 @@ export const Restaurant: React.FC = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="text-center">
-          <Button 
-            onClick={() => setShowBookingModal(true)}
-            variant="primary" 
-            className="px-8 py-4 text-lg shadow-2xl"
-          >
-            Reserve a Table
-          </Button>
         </div>
       </div>
 

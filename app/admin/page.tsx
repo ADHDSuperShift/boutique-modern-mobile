@@ -10,7 +10,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
+  checkAuth();
+  const onFocus = () => checkAuth();
+  window.addEventListener('focus', onFocus);
+  return () => window.removeEventListener('focus', onFocus);
   }, []);
 
   const checkAuth = async () => {
@@ -30,6 +33,8 @@ export default function AdminPage() {
   return isAuthenticated ? (
     <AdminDashboard />
   ) : (
-    <AdminLogin onLogin={() => setIsAuthenticated(true)} />
+    <div className="min-h-screen flex items-center justify-center">
+      <AdminLogin onLogin={() => setIsAuthenticated(true)} />
+    </div>
   );
 }

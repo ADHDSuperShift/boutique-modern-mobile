@@ -51,11 +51,21 @@ export const HeroManager: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('hero_section')
-        .upsert(heroData);
+      const payload = {
+        title: heroData.title,
+        subtitle: heroData.subtitle,
+        description: heroData.description,
+        backgroundImage: heroData.backgroundImage,
+        ctaText: heroData.ctaText,
+        ctaLink: heroData.ctaLink,
+      } as const;
 
-      if (error) throw error;
+      const res = await fetch('/api/admin/hero/upsert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: heroData.id || 'hero', ...payload })
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
       alert('✅ Hero section updated successfully!');
     } catch (err) {
       console.error('Error updating hero section:', err);

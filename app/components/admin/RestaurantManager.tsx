@@ -83,11 +83,21 @@ export const RestaurantManager: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('restaurant_info')
-        .upsert(restaurantData);
+      const payload = {
+        title: restaurantData.title,
+        subtitle: restaurantData.subtitle,
+        description: restaurantData.description,
+        features: restaurantData.features,
+        backgroundImage: restaurantData.backgroundImage,
+        menuSections: restaurantData.menuSections,
+      } as const;
 
-      if (error) throw error;
+      const res = await fetch('/api/admin/restaurant/upsert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: restaurantData.id || 'restaurant', ...payload })
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
       alert('✅ Restaurant information updated successfully!');
     } catch (err) {
       console.error('Error updating restaurant info:', err);

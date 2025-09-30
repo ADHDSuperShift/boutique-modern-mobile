@@ -18,8 +18,21 @@ export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('rooms');
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
+    try {
+      await supabase.auth.signOut();
+    } catch {}
+    try {
+      // Clear Supabase auth artifacts from localStorage
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (k.startsWith('sb-') || k.startsWith('supabase.')) keys.push(k);
+      }
+      keys.forEach((k) => localStorage.removeItem(k));
+    } catch {}
+    // Hard redirect to re-evaluate session state
+    window.location.replace('/admin?logout=1');
   };
 
   const tabs = [

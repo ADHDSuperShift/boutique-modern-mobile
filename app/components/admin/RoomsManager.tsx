@@ -84,7 +84,7 @@ const SortableRoomItem: React.FC<SortableRoomItemProps> = ({ room, onEdit, onDel
           <h3 className="font-bold text-lg text-slate-800 mb-1">{room.name}</h3>
           <p className="text-slate-600 mb-2">{room.type}</p>
           <p className="text-sm text-slate-500 line-clamp-2">{room.shortDesc}</p>
-          {room.price && (
+          {room.price !== undefined && room.price !== null && (
             <p className="text-amber-600 font-semibold mt-2">R{room.price}/night</p>
           )}
         </div>
@@ -142,7 +142,18 @@ export const RoomsManager: React.FC = () => {
         // Fallback to static data if Supabase fails
         setRooms(staticRooms);
       } else {
-        setRooms(data || staticRooms);
+        const mapped = (data || []).map((r: any) => ({
+          id: r.id,
+          name: r.name ?? '',
+          type: r.type ?? '',
+          shortDesc: r.shortDesc ?? r.short_description ?? '',
+          description: r.description ?? '',
+          amenities: Array.isArray(r.amenities) ? r.amenities : (typeof r.amenities === 'string' ? [] : []),
+          price: r.price == null ? undefined : Number(r.price),
+          image: r.image ?? '',
+          images: Array.isArray(r.images) ? r.images : (r.images ? [r.images] : []),
+        } as Room));
+        setRooms(mapped.length ? mapped : staticRooms);
       }
     } catch (err) {
       console.error('Error fetching rooms:', err);
@@ -151,6 +162,34 @@ export const RoomsManager: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Replace direct supabase writes with API calls
+  const apiUpdateRoom = async (id: string, payload: any) => {
+    const res = await fetch('/api/admin/rooms/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, payload })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
+  };
+
+  const apiReorderRooms = async (order: Array<{ id: string; sort_order: number }>) => {
+    const res = await fetch('/api/admin/rooms/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Reorder failed');
+  };
+
+  const apiDeleteRoom = async (id: string) => {
+    const res = await fetch('/api/admin/rooms/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Delete failed');
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -166,8 +205,7 @@ export const RoomsManager: React.FC = () => {
         Promise.resolve().then(async () => {
           try {
             const updates = newOrder.map((r, idx) => ({ id: r.id, sort_order: idx + 1 }));
-            const { error } = await supabase.from('rooms').upsert(updates);
-            if (error) console.error('Failed to persist room order:', error);
+            await apiReorderRooms(updates);
           } catch (e) {
             console.error('Error persisting room order:', e);
           }
@@ -181,12 +219,7 @@ export const RoomsManager: React.FC = () => {
     if (!confirm('Are you sure you want to delete this room?')) return;
 
     try {
-      const { error } = await supabase
-        .from('rooms')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await apiDeleteRoom(id);
       fetchRooms();
     } catch (err) {
       console.error('Error deleting room:', err);
@@ -215,40 +248,62 @@ export const RoomsManager: React.FC = () => {
       console.log('🔧 Save already in progress, ignoring...');
       return;
     }
-    
     setIsModalLoading(true);
     console.log('🔧 Saving room:', updatedRoom);
-    
-    try {
-      const { error } = await supabase
-        .from('rooms')
-        .update(updatedRoom)
-        .eq('id', updatedRoom.id);
 
-      if (error) {
-        console.error('❌ Supabase error:', error);
-        throw error;
-      }
-      
+    // Compute merged once so it's available in catch/finally as needed
+    const existing = rooms.find(r => r.id === updatedRoom.id);
+    const merged: Room = {
+      id: updatedRoom.id,
+      name: updatedRoom.name || existing?.name || '',
+      type: updatedRoom.type || existing?.type || '',
+      description: (updatedRoom.description ?? existing?.description) || '',
+      shortDesc: (updatedRoom.shortDesc ?? existing?.shortDesc) || '',
+      amenities: Array.isArray(updatedRoom.amenities) ? updatedRoom.amenities : (existing?.amenities ?? []),
+      price: typeof updatedRoom.price === 'number' ? updatedRoom.price : (existing?.price ?? 0),
+      image: updatedRoom.image ?? existing?.image ?? '',
+      images: Array.isArray(updatedRoom.images) ? updatedRoom.images : (existing?.images ?? []),
+    };
+
+    try {
+      // Map UI fields to DB columns and send only valid columns
+      const payload = {
+        name: merged.name,
+        type: merged.type,
+        description: merged.description || null,
+        short_description: merged.shortDesc || null,
+        amenities: merged.amenities ?? [],
+        price: typeof merged.price === 'number' ? merged.price : 0,
+        image: merged.image || null,
+        images: Array.isArray(merged.images) ? merged.images : [],
+      } as const;
+
+      await apiUpdateRoom(updatedRoom.id, payload);
+
       console.log('✅ Room updated successfully in database');
-      
-      // Update local state
-      setRooms(prev => prev.map(room => 
-        room.id === updatedRoom.id ? updatedRoom : room
+
+      // Update local state with merged values
+      setRooms(prev => prev.map(room =>
+        room.id === updatedRoom.id ? merged : room
       ));
       setEditingRoom(null);
-      
+
       alert('✅ Room updated successfully!');
-    } catch (err) {
-      console.error('❌ Error updating room:', err);
-      
-      // Still update local state for demo purposes
-      setRooms(prev => prev.map(room => 
-        room.id === updatedRoom.id ? updatedRoom : room
+    } catch (err: any) {
+      console.error('❌ Error updating room:', {
+        message: err?.message,
+        details: err?.details,
+        hint: err?.hint,
+        code: err?.code,
+      });
+
+      // Still update local state optimistically
+      setRooms(prev => prev.map(room =>
+        room.id === updatedRoom.id ? merged : room
       ));
       setEditingRoom(null);
-      
-      alert('⚠️ Room updated locally (database may not be connected yet)');
+
+      alert(`⚠️ Room updated locally (DB update failed): ${err?.message || 'see console for details'}`);
     } finally {
       setIsModalLoading(false);
     }

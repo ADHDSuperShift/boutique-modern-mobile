@@ -27,6 +27,9 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onDetails, onBook }) =
       <div className="p-6">
         <h3 className="text-2xl font-bold text-slate-800 mb-2">{room.name}</h3>
         <p className="text-slate-600 mb-4 line-clamp-2">{room.short_description || ''}</p>
+        {room.price !== undefined && room.price !== null && (
+          <p className="text-amber-600 font-semibold mb-4">R{room.price}/night</p>
+        )}
         <div className="flex gap-3">
           <Button onClick={onBook} variant="primary" className="flex-1">
             Book Now

@@ -13,16 +13,15 @@ export const AdminDebugPanel: React.FC = () => {
       // Import supabase dynamically to avoid SSR issues
       const { supabase } = await import('../../lib/supabase');
       
-      // Test basic connection
-      const { data, error } = await supabase
+      // Fetch exact total count without returning rows
+      const { count, error } = await supabase
         .from('rooms')
-        .select('*')
-        .limit(1);
+        .select('id', { count: 'exact', head: true });
 
       if (error) {
         setTestResult(`❌ Database Error: ${error.message}`);
       } else {
-        setTestResult(`✅ Database Connected! Found ${data?.length || 0} rooms`);
+        setTestResult(`✅ Database Connected! Total rooms: ${count ?? 0}`);
       }
     } catch (err) {
       setTestResult(`❌ Connection Error: ${(err as Error).message}`);

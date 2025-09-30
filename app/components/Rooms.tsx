@@ -13,6 +13,7 @@ export type PublicRoom = {
   type: string;
   description?: string;
   short_description?: string;
+  price?: number;
   image: string;
   images?: string[];
   amenities?: string[];
@@ -42,6 +43,7 @@ export const Rooms: React.FC = () => {
               type: r.type,
               description: r.description,
               short_description: r.short_description,
+              price: r.price == null ? undefined : Number(r.price),
               image: r.image,
               images: r.images || (r.image ? [r.image] : []),
               amenities: Array.isArray(r.amenities) ? r.amenities : [],

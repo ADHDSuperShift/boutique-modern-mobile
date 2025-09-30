@@ -150,7 +150,15 @@ export const EventsManager: React.FC = () => {
         // Fallback to static data if Supabase fails
         setEvents(staticEvents);
       } else {
-        setEvents(data || staticEvents);
+        const mapped = (data || []).map((e: any) => ({
+          id: e.id,
+          title: e.title ?? '',
+          date: e.date ?? '',
+          category: e.category ?? '',
+          description: e.description ?? '',
+          image: e.image ?? '',
+        } as Event));
+        setEvents(mapped.length ? mapped : staticEvents);
       }
     } catch (err) {
       console.error('Error fetching events:', err);
@@ -170,12 +178,15 @@ export const EventsManager: React.FC = () => {
         const newIndex = items.findIndex((item) => item.id === over?.id);
 
         const newOrder = arrayMove(items, oldIndex, newIndex);
-        // Persist order
         Promise.resolve().then(async () => {
           try {
             const updates = newOrder.map((e, idx) => ({ id: e.id, sort_order: idx + 1 }));
-            const { error } = await supabase.from('events').upsert(updates);
-            if (error) console.error('Failed to persist event order:', error);
+            const res = await fetch('/api/admin/events/reorder', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ order: updates })
+            });
+            if (!res.ok) console.error('Failed to persist event order:', await res.json());
           } catch (e) {
             console.error('Error persisting event order:', e);
           }
@@ -189,12 +200,12 @@ export const EventsManager: React.FC = () => {
     if (!confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      const { error } = await supabase
-        .from('events')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      const res = await fetch('/api/admin/events/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Delete failed');
       fetchEvents();
     } catch (err) {
       console.error('Error deleting event:', err);
@@ -210,43 +221,37 @@ export const EventsManager: React.FC = () => {
   const handleSaveEdit = async (updatedEvent: Event) => {
     setIsSaving(true);
     try {
-      // Insert or update based on existence
-      const exists = events.some(e => e.id === updatedEvent.id);
-      if (exists) {
-        const { error } = await supabase
-          .from('events')
-          .update({
-            title: updatedEvent.title,
-            date: updatedEvent.date,
-            category: updatedEvent.category ?? null,
-            description: updatedEvent.description,
-            image: updatedEvent.image,
-          })
-          .eq('id', updatedEvent.id);
-        if (error) throw error;
-      } else {
-        // Ensure we have an id
-        const id = updatedEvent.id || (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`);
-        const { error } = await supabase
-          .from('events')
-          .insert({
-            id,
-            title: updatedEvent.title,
-            date: updatedEvent.date,
-            category: updatedEvent.category ?? null,
-            description: updatedEvent.description,
-            image: updatedEvent.image,
-          });
-        if (error) throw error;
-        updatedEvent.id = id;
-      }
+      // Merge-on-save to avoid wiping fields
+      const existing = events.find(e => e.id === updatedEvent.id);
+      const merged: Event = {
+        id: updatedEvent.id || existing?.id || (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`),
+        title: updatedEvent.title || existing?.title || 'Untitled Event',
+        date: updatedEvent.date || existing?.date || new Date().toISOString().slice(0,10),
+        category: (updatedEvent.category ?? existing?.category) || '',
+        description: (updatedEvent.description ?? existing?.description) || '',
+        image: (updatedEvent.image ?? existing?.image) || '',
+      };
 
-      // Update local state
+      const payload = {
+        title: merged.title,
+        date: merged.date,
+        category: merged.category || null,
+        description: merged.description,
+        image: merged.image || null,
+      } as const;
+
+      const res = await fetch('/api/admin/events/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: merged.id, payload })
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
+
       setEvents(prev => {
-        const idx = prev.findIndex(e => e.id === updatedEvent.id);
-        if (idx === -1) return [updatedEvent, ...prev];
+        const idx = prev.findIndex(e => e.id === merged.id);
+        if (idx === -1) return [merged, ...prev];
         const copy = [...prev];
-        copy[idx] = updatedEvent;
+        copy[idx] = merged;
         return copy;
       });
       setEditingEvent(null);
