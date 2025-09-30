@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { ImageDropzone } from '../ui/ImageDropzone';
+import Image from 'next/image';
 
 interface Amenity {
   id: string;
@@ -242,11 +243,15 @@ export const AmenitiesManager: React.FC = () => {
                 <h3 className="font-bold text-lg text-slate-800 mb-1">{amenity.name}</h3>
                 <p className="text-slate-600 text-sm">{amenity.description}</p>
                 {amenity.image && (
-                  <img 
-                    src={amenity.image} 
-                    alt={amenity.name}
-                    className="w-16 h-16 object-cover rounded-lg mt-2"
-                  />
+                  <div className="relative w-16 h-16 mt-2">
+                    <Image 
+                      src={amenity.image} 
+                      alt={amenity.name}
+                      fill
+                      className="object-cover rounded-lg"
+                      sizes="64px"
+                    />
+                  </div>
                 )}
               </div>
             </div>

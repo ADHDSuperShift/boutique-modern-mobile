@@ -5,6 +5,7 @@ import { wines as fallbackWines } from '../data/wines';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
 import { supabase } from '../lib/supabase';
+import Image from 'next/image';
 
 type Wine = {
   id: string;
@@ -97,11 +98,14 @@ export const WineBoutique: React.FC = () => {
               a story of South African terroir and craftsmanship.
             </p>
           </div>
-          <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200 hover:shadow-3xl transition-all duration-300">
-            <img 
+          <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200 hover:shadow-3xl transition-all duration-300">
+            <Image 
               src="https://d64gsuwffb70l.cloudfront.net/68db807a8d8aec1a73e2d1d7_1759215824801_0c081541.webp" 
               alt="Wine Boutique"
-              className="w-full h-96 object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
             />
           </div>
         </div>
@@ -118,11 +122,15 @@ export const WineBoutique: React.FC = () => {
       {items.map((wine) => (
                 <div key={wine.id} className="w-1/3 flex-shrink-0 px-2">
                   <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 p-6 hover:shadow-2xl hover:ring-amber-300 transition-all duration-300 backdrop-blur-sm">
-                    <img 
-                      src={wine.image} 
-                      alt={wine.name}
-                      className="w-full h-48 object-contain mb-4"
-                    />
+                    <div className="relative w-full h-48 mb-4">
+                      <Image 
+                        src={wine.image} 
+                        alt={wine.name}
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 1024px) 33vw, 33vw"
+                      />
+                    </div>
                     <h4 className="font-bold text-slate-800 mb-2 text-sm">{wine.name}</h4>
         <p className="text-xs text-slate-600 mb-1">{wine.region}</p>
         <p className="text-xs text-amber-600 mb-3 font-medium">{wine.vintage}</p>

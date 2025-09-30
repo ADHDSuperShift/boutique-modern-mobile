@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
 
 interface ImageDropzoneProps {
   onImageUpload: (imageUrl: string) => void;
@@ -138,11 +139,16 @@ export const ImageDropzone: React.FC<ImageDropzoneProps> = ({
         
         {preview ? (
           <div className="space-y-4">
-            <img
-              src={preview}
-              alt="Preview"
-              className="mx-auto max-h-32 rounded-lg shadow-md"
-            />
+            <div className="relative mx-auto w-full h-32">
+              <Image
+                src={preview}
+                alt="Preview"
+                fill
+                className="object-contain rounded-lg shadow-md"
+                sizes="(max-width: 768px) 80vw, 400px"
+                unoptimized
+              />
+            </div>
             <p className="text-sm text-slate-600">
               📸 Image ready! Drop a new one to replace
             </p>

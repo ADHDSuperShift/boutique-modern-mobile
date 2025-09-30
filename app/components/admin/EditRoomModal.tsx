@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { ImageDropzone } from '../ui/ImageDropzone';
@@ -140,11 +141,13 @@ export const EditRoomModal: React.FC<EditRoomModalProps> = ({ room, onSave, onCa
             {formData.images && formData.images.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {formData.images.map((image, index) => (
-                  <div key={index} className="relative group">
-                    <img 
+                  <div key={index} className="relative group w-full h-20">
+                    <Image 
                       src={image} 
                       alt={`Gallery ${index + 1}`}
-                      className="w-full h-20 object-cover rounded-lg shadow-sm"
+                      fill
+                      className="object-cover rounded-lg shadow-sm"
+                      sizes="(max-width: 768px) 33vw, 200px"
                     />
                     <button
                       type="button"
