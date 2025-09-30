@@ -53,6 +53,7 @@
 
   .line-clamp-2 {
     display: -webkit-box;
+  line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -60,6 +61,7 @@
 
   .line-clamp-3 {
     display: -webkit-box;
+  line-clamp: 3;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -71,5 +73,11 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Luxury display font for headings */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), var(--font-sans), serif;
+  letter-spacing: 0.01em;
 }

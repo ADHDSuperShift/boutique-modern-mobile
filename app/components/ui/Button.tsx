@@ -9,10 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 hover:from-amber-500 hover:to-yellow-600 shadow-amber-500/25 disabled:hover:from-amber-400 disabled:hover:to-yellow-500 font-semibold',
-        secondary: 'bg-gradient-to-r from-slate-700 to-slate-800 text-slate-100 hover:from-slate-600 hover:to-slate-700 shadow-slate-500/25 disabled:hover:from-slate-700 disabled:hover:to-slate-800',
+  primary: 'bg-gradient-to-r from-[#D4AF37] via-[#E6C85C] to-[#F0D77B] text-slate-900 hover:from-[#C6A02E] hover:via-[#DBBF57] hover:to-[#EBD06F] shadow-[rgba(212,175,55,0.35)] disabled:hover:from-[#D4AF37] disabled:hover:via-[#E6C85C] disabled:hover:to-[#F0D77B] font-semibold',
+  secondary: 'bg-gradient-to-r from-slate-600 to-slate-700 text-white hover:from-slate-500 hover:to-slate-600 shadow-slate-500/20 disabled:hover:from-slate-600 disabled:hover:to-slate-700',
         outline: 'border-2 border-amber-400 text-amber-400 hover:bg-gradient-to-r hover:from-amber-400 hover:to-yellow-500 hover:text-slate-900 bg-transparent hover:border-transparent disabled:hover:bg-transparent disabled:hover:text-amber-400 disabled:hover:border-amber-400',
-        ghost: 'hover:bg-slate-100 hover:text-slate-900 text-slate-600',
+  ghost: 'hover:bg-slate-100 hover:text-slate-900 text-slate-600 dark:hover:bg-slate-800 dark:text-slate-300',
         link: 'text-amber-600 underline-offset-4 hover:underline'
       },
       size: {

@@ -67,14 +67,14 @@ export const Events: React.FC = () => {
 
   if (loading) {
     return (
-      <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50">
+      <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/60">
         <div className="container mx-auto px-4 text-center text-slate-600">Loading…</div>
       </section>
     );
   }
 
   return (
-    <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50">
+    <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/60">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
@@ -88,7 +88,7 @@ export const Events: React.FC = () => {
 
         <div className="grid md:grid-cols-3 gap-6">
           {events.map((event) => (
-            <div key={event.id} className="bg-white rounded-xl shadow-sm ring-1 ring-slate-200 p-4">
+            <div key={event.id} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 p-4">
               <div className="flex items-center gap-4">
                 {/* Thumbnail */}
                 <div className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden ring-1 ring-slate-200">

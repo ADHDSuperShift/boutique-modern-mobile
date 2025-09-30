@@ -2,19 +2,19 @@ import React from 'react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-gradient-to-b from-slate-900 to-slate-800 text-white py-12">
+  <footer className="bg-gradient-to-b from-[#060B3F] to-[#0E1E6E] text-white py-12">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h3 className="text-xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent mb-4">Barrydale Karoo Lodge</h3>
-            <p className="text-slate-400">
+            <h3 className="text-xl font-bold font-display bg-gradient-to-r from-amber-500 to-yellow-400 bg-clip-text text-transparent mb-4">Barrydale Karoo Lodge</h3>
+            <p className="text-white/80">
               Boutique comfort in the heart of Route 62
             </p>
           </div>
           
           <div>
-            <h4 className="font-bold mb-4 text-amber-400">Quick Links</h4>
-            <ul className="space-y-2 text-slate-400">
+            <h4 className="font-bold mb-4 text-amber-300">Quick Links</h4>
+            <ul className="space-y-2 text-white/80">
               <li><a href="#home" className="hover:text-amber-400 transition-colors">Home</a></li>
               <li><a href="#rooms" className="hover:text-amber-400 transition-colors">Rooms</a></li>
               <li><a href="#restaurant" className="hover:text-amber-400 transition-colors">Restaurant</a></li>
@@ -24,8 +24,8 @@ export const Footer: React.FC = () => {
           </div>
           
           <div>
-            <h4 className="font-bold mb-4 text-amber-400">Contact</h4>
-            <ul className="space-y-2 text-slate-400">
+            <h4 className="font-bold mb-4 text-amber-300">Contact</h4>
+            <ul className="space-y-2 text-white/80">
               <li>11 Tennant Street</li>
               <li>Barrydale, 6750</li>
               <li>+27 (028) 572 1020</li>
@@ -34,7 +34,7 @@ export const Footer: React.FC = () => {
           </div>
           
           <div>
-            <h4 className="font-bold mb-4 text-amber-400">Follow Us</h4>
+            <h4 className="font-bold mb-4 text-amber-300">Follow Us</h4>
             <div className="flex gap-4">
               <a
                 href="#"
@@ -97,8 +97,8 @@ export const Footer: React.FC = () => {
           </div>
         </div>
         
-        <div className="border-t border-slate-700 pt-8 text-center text-slate-400">
-          <p>&copy; 2025 Barrydale Karoo Lodge. All rights reserved.</p>
+        <div className="border-t border-white/20 pt-8 text-center text-white/80">
+          <p className="font-display">&copy; 2025 Barrydale Karoo Lodge. All rights reserved.</p>
         </div>
       </div>
     </footer>

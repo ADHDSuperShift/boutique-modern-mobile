@@ -45,13 +45,13 @@ export const Amenities: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="py-20 bg-[#E8DCC4] bg-opacity-30">
+      <section className="py-20 bg-[#E8DCC4] bg-opacity-30 dark:bg-slate-900/40">
         <div className="container mx-auto px-4 text-center text-slate-600">Loading…</div>
       </section>
     );
   }
   return (
-    <section className="py-20 bg-[#E8DCC4] bg-opacity-30">
+    <section className="py-20 bg-[#E8DCC4] bg-opacity-30 dark:bg-slate-900/40">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-[#2C2C2C] mb-4">
@@ -64,10 +64,10 @@ export const Amenities: React.FC = () => {
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {data.map((amenity, idx) => (
-            <div key={idx} className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-shadow">
+            <div key={idx} className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 hover:shadow-2xl transition-shadow">
               <div className="text-5xl mb-4">{amenity.icon}</div>
-              <h3 className="text-2xl font-bold text-[#2C2C2C] mb-3">{amenity.name}</h3>
-              <p className="text-gray-700">{amenity.description}</p>
+              <h3 className="text-2xl font-bold text-[#2C2C2C] dark:text-slate-100 mb-3">{amenity.name}</h3>
+              <p className="text-gray-700 dark:text-slate-300">{amenity.description}</p>
             </div>
           ))}
         </div>
