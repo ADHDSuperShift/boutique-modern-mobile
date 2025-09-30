@@ -83,7 +83,7 @@ export const ImageDropzone: React.FC<ImageDropzoneProps> = ({
     } finally {
       setIsUploading(false);
     }
-  }, [onImageUpload]);
+  }, [onImageUpload, folder]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -184,7 +184,7 @@ export const ImageDropzone: React.FC<ImageDropzoneProps> = ({
         {isDragging && (
           <div className="absolute inset-0 bg-amber-200/20 rounded-lg flex items-center justify-center">
             <p className="text-amber-800 font-semibold text-lg">
-              🎯 Drop it like it's hot!
+              🎯 Drop it like it&apos;s hot!
             </p>
           </div>
         )}
