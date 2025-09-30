@@ -1,0 +1,43 @@
+import React from 'react';
+import { Button } from './ui/Button';
+
+interface RoomCardProps {
+  room: {
+    id: string;
+    name: string;
+    type: string;
+    shortDesc: string;
+    image: string;
+  };
+  onDetails: () => void;
+  onBook: () => void;
+}
+
+export const RoomCard: React.FC<RoomCardProps> = ({ room, onDetails, onBook }) => {
+  return (
+    <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 overflow-hidden transform hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:ring-amber-300 backdrop-blur-sm">
+      <div className="relative h-64 overflow-hidden">
+        <img 
+          src={room.image} 
+          alt={room.name}
+          className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+        />
+        <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
+          {room.type}
+        </div>
+      </div>
+      <div className="p-6">
+        <h3 className="text-2xl font-bold text-slate-800 mb-2">{room.name}</h3>
+        <p className="text-slate-600 mb-4 line-clamp-2">{room.shortDesc}</p>
+        <div className="flex gap-3">
+          <Button onClick={onBook} variant="primary" className="flex-1">
+            Book Now
+          </Button>
+          <Button onClick={onDetails} variant="outline" className="flex-1">
+            Details
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};

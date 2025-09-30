@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Luxury Color Palette */
+    --luxury-dark: #1a1a1a;
+    --luxury-charcoal: #2c2c2c;
+    --luxury-gold: #d4af37;
+    --luxury-gold-light: #f4e4a7;
+    --luxury-gold-dark: #b8941f;
+    --luxury-cream: #f8f6f0;
+    --luxury-pearl: #faf9f7;
+    --luxury-accent: #8b4513;
+    --luxury-accent-light: #a0522d;
+    --luxury-grey: #6b7280;
+    --luxury-grey-light: #9ca3af;
+    --luxury-border: #e5e7eb;
+  }
+}
+
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 0.8s ease-in-out forwards;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
