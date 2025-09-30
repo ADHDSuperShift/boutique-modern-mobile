@@ -30,8 +30,11 @@ interface Room {
   name: string;
   type: string;
   shortDesc: string;
+  description?: string;
+  amenities?: string[];
   price?: number;
   image: string;
+  images?: string[];
 }
 
 interface SortableRoomItemProps {
@@ -182,30 +185,43 @@ export const RoomsManager: React.FC = () => {
   };
 
   const handleEdit = (room: Room) => {
+    console.log('🔧 Opening edit modal for room:', room);
     setEditingRoom(room);
   };
 
   const handleSaveEdit = async (updatedRoom: Room) => {
+    console.log('🔧 Saving room:', updatedRoom);
+    
     try {
       const { error } = await supabase
         .from('rooms')
         .update(updatedRoom)
         .eq('id', updatedRoom.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('✅ Room updated successfully in database');
       
       // Update local state
       setRooms(prev => prev.map(room => 
         room.id === updatedRoom.id ? updatedRoom : room
       ));
       setEditingRoom(null);
+      
+      alert('✅ Room updated successfully!');
     } catch (err) {
-      console.error('Error updating room:', err);
-      // For demo purposes, update local state
+      console.error('❌ Error updating room:', err);
+      
+      // Still update local state for demo purposes
       setRooms(prev => prev.map(room => 
         room.id === updatedRoom.id ? updatedRoom : room
       ));
       setEditingRoom(null);
+      
+      alert('⚠️ Room updated locally (database may not be connected yet)');
     }
   };
 

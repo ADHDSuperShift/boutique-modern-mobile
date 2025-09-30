@@ -7,8 +7,11 @@ interface Room {
   name: string;
   type: string;
   shortDesc: string;
+  description?: string;
+  amenities?: string[];
   price?: number;
   image: string;
+  images?: string[];
 }
 
 interface EditRoomModalProps {
