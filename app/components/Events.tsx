@@ -67,14 +67,14 @@ export const Events: React.FC = () => {
 
   if (loading) {
     return (
-      <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/60">
+      <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-100 dark:from-slate-900 dark:to-slate-900/60">
         <div className="container mx-auto px-4 text-center text-slate-600">Loading…</div>
       </section>
     );
   }
 
   return (
-    <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/60">
+    <section id="events" className="py-20 bg-gradient-to-b from-white to-slate-100 dark:from-slate-900 dark:to-slate-900/60">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
@@ -116,7 +116,7 @@ export const Events: React.FC = () => {
                       )}
                       {formatTime(event.dateObj) && (
                         <span className="inline-flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                           {formatTime(event.dateObj)}
                         </span>
                       )}

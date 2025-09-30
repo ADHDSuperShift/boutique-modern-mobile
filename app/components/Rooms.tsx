@@ -72,14 +72,14 @@ export const Rooms: React.FC = () => {
 
   if (loading) {
     return (
-      <section id="rooms" className="py-20 bg-gradient-to-b from-amber-50/30 to-slate-50">
+  <section id="rooms" className="py-20 bg-gradient-to-b from-amber-50/30 to-slate-100">
         <div className="container mx-auto px-4 text-center text-slate-600">Loading…</div>
       </section>
     );
   }
 
   return (
-    <section id="rooms" className="py-20 bg-gradient-to-b from-amber-50/30 to-slate-50">
+  <section id="rooms" className="py-20 bg-gradient-to-b from-amber-50/30 to-slate-100">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">

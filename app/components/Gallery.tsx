@@ -42,7 +42,7 @@ export const Gallery: React.FC = () => {
   const validImages = images.filter(Boolean);
 
   return (
-    <section id="gallery" className="py-16 bg-slate-50 dark:bg-slate-900/40">
+    <section id="gallery" className="py-16 bg-slate-100 dark:bg-slate-900/40">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-8 dark:from-amber-200 dark:to-yellow-200">
           {title}
