@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { rooms as fallbackRooms } from '../data/rooms';
 import { RoomCard } from './RoomCard';
 import { RoomModal } from './RoomModal';
-import { BookingModal } from './BookingModal';
 import { supabase } from '../lib/supabase';
 
 export type PublicRoom = {
@@ -22,10 +21,9 @@ export type PublicRoom = {
 export const Rooms: React.FC = () => {
   const [selectedRoom, setSelectedRoom] = useState<PublicRoom | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [showBooking, setShowBooking] = useState(false);
-  const [bookingRoom, setBookingRoom] = useState<string>('');
   const [items, setItems] = useState<PublicRoom[]>(fallbackRooms as unknown as PublicRoom[]);
   const [loading, setLoading] = useState(true);
+  const NB_URL = process.env.NEXT_PUBLIC_NIGHTSBRIDGE_URL || 'https://book.nightsbridge.com/';
 
   useEffect(() => {
     const load = async () => {
@@ -64,9 +62,11 @@ export const Rooms: React.FC = () => {
     setShowDetails(true);
   };
 
-  const handleBook = (roomName: string) => {
-    setBookingRoom(roomName);
-    setShowBooking(true);
+  const handleBook = (_roomName: string) => {
+    // Open NightsBridge booking in a new tab/window
+    if (typeof window !== 'undefined') {
+      window.open(NB_URL, '_blank', 'noopener,noreferrer');
+    }
     setShowDetails(false);
   };
 
@@ -107,12 +107,6 @@ export const Rooms: React.FC = () => {
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
         onBook={() => selectedRoom && handleBook(selectedRoom.name)}
-      />
-
-      <BookingModal
-        isOpen={showBooking}
-        onClose={() => setShowBooking(false)}
-        roomName={bookingRoom}
       />
     </section>
   );

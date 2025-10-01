@@ -59,7 +59,6 @@ export const Hero: React.FC = () => {
         <p className="text-xl md:text-2xl mb-4 font-light animate-fadeIn text-slate-200" style={{ animationDelay: '0.2s' }}>{hero.subtitle}</p>
         <p className="text-lg md:text-xl mb-8 animate-fadeIn text-slate-300" style={{ animationDelay: '0.4s' }}>{hero.description}</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeIn" style={{ animationDelay: '0.6s' }}>
-          <Button onClick={() => scrollToSection(hero.ctaLink || '#rooms')} variant="primary">{hero.ctaText || 'Book Your Stay'}</Button>
           <Button onClick={() => scrollToSection('#rooms')} variant="outline">Explore Rooms</Button>
         </div>
       </div>

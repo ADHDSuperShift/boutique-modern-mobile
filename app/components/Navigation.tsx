@@ -49,10 +49,10 @@ export const Navigation: React.FC = () => {
             </span>
             <span className="flex flex-col items-start leading-tight">
               <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-300 to-yellow-200 bg-clip-text text-transparent">
-                Barrydale
+                Barrydale Karoo
               </span>
               <span className="text-sm md:text-base text-white/90 group-hover:text-amber-200 transition-colors">
-                Karoo Lodge
+                Boutique Hotel
               </span>
             </span>
           </button>
@@ -63,7 +63,7 @@ export const Navigation: React.FC = () => {
               <button
                 key={item.href}
                 onClick={() => handleClick(item.href)}
-        className="text-white font-medium hover:text-amber-300 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-white/10 hover:shadow-lg relative group"
+        className="text-amber-200 font-medium hover:text-yellow-300 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-white/10 hover:shadow-lg relative group"
               >
                 {item.label}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-400 to-yellow-300 transition-all duration-300 group-hover:w-full"></span>
@@ -73,7 +73,7 @@ export const Navigation: React.FC = () => {
             {/* Admin Button */}
             <button
               onClick={() => handleClick('/admin')}
-              className="text-white font-medium hover:text-amber-300 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-white/10 hover:shadow-lg relative group border border-amber-400/30"
+              className="text-amber-200 font-medium hover:text-yellow-300 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-white/10 hover:shadow-lg relative group border border-amber-400/30"
             >
               Admin
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-400 to-yellow-300 transition-all duration-300 group-hover:w-full"></span>

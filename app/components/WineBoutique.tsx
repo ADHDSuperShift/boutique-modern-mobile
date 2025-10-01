@@ -26,7 +26,6 @@ export const WineBoutique: React.FC = () => {
   const [selectedWine, setSelectedWine] = useState<Wine | null>(null);
   const [showInquiry, setShowInquiry] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [items, setItems] = useState<Wine[]>(fallbackWines as unknown as Wine[]);
 
   // Load wines from Supabase
@@ -63,14 +62,7 @@ export const WineBoutique: React.FC = () => {
     load();
   }, []);
 
-  // Auto-rotate carousel
-  useEffect(() => {
-    const maxIndex = Math.max(0, items.length - 3);
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [items.length]);
+  // No carousel auto-rotate
 
   const handleInquiry = (wine: Wine) => {
     setSelectedWine(wine);
@@ -95,15 +87,7 @@ export const WineBoutique: React.FC = () => {
     }
   };
 
-  const nextImage = () => {
-    const maxIndex = Math.max(0, items.length - 3);
-    setCurrentImageIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
-  };
-
-  const prevImage = () => {
-    const maxIndex = Math.max(0, items.length - 3);
-    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? maxIndex : prevIndex - 1));
-  };
+  // No carousel controls
 
   return (
     <section id="wine" className="py-20 bg-gradient-to-b from-slate-100 to-amber-50/30">
@@ -128,69 +112,33 @@ export const WineBoutique: React.FC = () => {
           </div>
         </div>
 
-        <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-8 text-center">Wine Collection</h3>
+  <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-8 text-center">Featured Wines</h3>
         
-        {/* Wine Carousel */}
-        <div className="relative">
-          <div className="overflow-hidden">
-            <div 
-              className="flex transition-transform duration-300 ease-in-out"
-              style={{ transform: `translateX(-${currentImageIndex * 33.333}%)` }}
-            >
-      {items.map((wine) => (
-                <div key={wine.id} className="w-1/3 flex-shrink-0 px-2">
-                  <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 p-6 hover:shadow-2xl hover:ring-amber-300 transition-all duration-300 backdrop-blur-sm">
-                    <div className="relative w-full h-48 mb-4">
-                      <Image 
-                        src={wine.image} 
-                        alt={wine.name}
-                        fill
-                        className="object-contain"
-                        sizes="(max-width: 1024px) 33vw, 33vw"
-                      />
-                    </div>
-                    <h4 className="font-bold text-slate-800 mb-2 text-sm">{wine.name}</h4>
-        <p className="text-xs text-slate-600 mb-1">{wine.region}</p>
-        <p className="text-xs text-amber-600 mb-3 font-medium">{wine.vintage}</p>
-                    <Button 
-                      onClick={() => handleInquiry(wine)} 
-                      variant="primary" 
-                      className="w-full text-sm py-2"
-                    >
-                      Inquire
-                    </Button>
-                  </div>
-                </div>
-              ))}
+        {/* Featured Wines Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {items.map((wine) => (
+            <div key={wine.id} className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 p-6 hover:shadow-2xl hover:ring-amber-300 transition-all duration-300 backdrop-blur-sm">
+              <div className="relative w-full h-48 mb-4">
+                <Image 
+                  src={wine.image} 
+                  alt={wine.name}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 1024px) 33vw, 33vw"
+                />
+              </div>
+              <h4 className="font-bold text-slate-800 mb-2 text-sm">{wine.name}</h4>
+              <p className="text-xs text-slate-600 mb-1">{wine.region}</p>
+              <p className="text-xs text-amber-600 mb-3 font-medium">{wine.vintage}</p>
+              <Button 
+                onClick={() => handleInquiry(wine)} 
+                variant="primary" 
+                className="w-full text-sm py-2"
+              >
+                Inquire
+              </Button>
             </div>
-          </div>
-          
-          {/* Carousel Controls */}
-          <button
-            onClick={prevImage}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-amber-400 to-yellow-500 text-white p-3 rounded-full hover:from-amber-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl backdrop-blur-sm"
-          >
-            ←
-          </button>
-          <button
-            onClick={nextImage}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-amber-400 to-yellow-500 text-white p-3 rounded-full hover:from-amber-500 hover:to-yellow-600 transition-all shadow-lg hover:shadow-xl backdrop-blur-sm"
-          >
-            →
-          </button>
-          
-          {/* Carousel Dots */}
-          <div className="flex justify-center mt-6 space-x-2">
-            {Array.from({ length: Math.max(1, items.length - 2) }).map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentImageIndex(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === currentImageIndex ? 'bg-gradient-to-r from-amber-400 to-yellow-500 shadow-md' : 'bg-slate-300 hover:bg-slate-400'
-                }`}
-              />
-            ))}
-          </div>
+          ))}
         </div>
       </div>
 

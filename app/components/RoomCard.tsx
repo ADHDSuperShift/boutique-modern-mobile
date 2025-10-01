@@ -10,6 +10,12 @@ interface RoomCardProps {
 }
 
 export const RoomCard: React.FC<RoomCardProps> = ({ room, onDetails, onBook }) => {
+  const NB_URL = process.env.NEXT_PUBLIC_NIGHTSBRIDGE_URL || 'https://book.nightsbridge.com/';
+  const goToNightsBridge = () => {
+    if (typeof window !== 'undefined') {
+      window.open(NB_URL, '_blank', 'noopener,noreferrer');
+    }
+  };
   return (
     <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-xl shadow-lg ring-1 ring-slate-200 overflow-hidden transform hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:ring-amber-300 backdrop-blur-sm">
       <div className="relative h-64 overflow-hidden">
@@ -31,7 +37,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onDetails, onBook }) =
           <p className="text-amber-600 font-semibold mb-4">R{room.price}/night</p>
         )}
         <div className="flex gap-3">
-          <Button onClick={onBook} variant="primary" className="flex-1">
+          <Button onClick={goToNightsBridge} variant="primary" className="flex-1">
             Book Now
           </Button>
           <Button onClick={onDetails} variant="outline" className="flex-1">

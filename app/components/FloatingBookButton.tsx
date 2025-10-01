@@ -3,14 +3,15 @@
 import React from 'react';
 
 export const FloatingBookButton: React.FC = () => {
-  const scrollToRooms = () => {
-    document.querySelector('#rooms')?.scrollIntoView({ behavior: 'smooth' });
+  const NB_URL = process.env.NEXT_PUBLIC_NIGHTSBRIDGE_URL || 'https://book.nightsbridge.com/';
+  const goToNightsBridge = () => {
+    window.open(NB_URL, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <button
-      onClick={scrollToRooms}
-      className="fixed bottom-8 right-8 z-30 bg-[#C67B5C] text-white px-6 py-4 rounded-full shadow-2xl hover:bg-[#B56A4B] transition-all transform hover:scale-110 flex items-center gap-2 font-medium"
+      onClick={goToNightsBridge}
+      className="fixed bottom-8 left-8 z-30 bg-gradient-to-r from-[#060B3F] to-[#0E1E6E] text-yellow-300 px-6 py-4 rounded-full shadow-2xl hover:brightness-110 transition-all transform hover:scale-110 flex items-center gap-2 font-medium ring-1 ring-amber-400/30"
       aria-label="Book Now"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

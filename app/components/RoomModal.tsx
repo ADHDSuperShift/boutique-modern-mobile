@@ -15,6 +15,20 @@ interface RoomModalProps {
 
 export const RoomModal: React.FC<RoomModalProps> = ({ room, isOpen, onClose, onBook }) => {
   const [currentImage, setCurrentImage] = useState(0);
+  const NB_URL = process.env.NEXT_PUBLIC_NIGHTSBRIDGE_URL || 'https://book.nightsbridge.com/';
+  const goToNightsBridge = () => {
+    if (typeof window !== 'undefined') {
+      window.open(NB_URL, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const nextImage = (total: number) => {
+    setCurrentImage((idx) => (total > 0 ? (idx + 1) % total : 0));
+  };
+
+  const prevImage = (total: number) => {
+    setCurrentImage((idx) => (total > 0 ? (idx - 1 + total) % total : 0));
+  };
 
   useEffect(() => {
     // reset carousel when switching rooms
@@ -49,6 +63,26 @@ export const RoomModal: React.FC<RoomModalProps> = ({ room, isOpen, onClose, onB
                 No image
               </div>
             )}
+            {images.length > 1 && (
+              <>
+                {/* Left Arrow */}
+                <button
+                  aria-label="Previous image"
+                  onClick={() => prevImage(images.length)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-slate-800 w-10 h-10 rounded-full shadow-lg flex items-center justify-center"
+                >
+                  ←
+                </button>
+                {/* Right Arrow */}
+                <button
+                  aria-label="Next image"
+                  onClick={() => nextImage(images.length)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-slate-800 w-10 h-10 rounded-full shadow-lg flex items-center justify-center"
+                >
+                  →
+                </button>
+              </>
+            )}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
               {images.map((_, idx) => (
                 <button
@@ -79,7 +113,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({ room, isOpen, onClose, onB
           ))}
         </ul>
 
-        <Button onClick={onBook} variant="primary" className="w-full">
+  <Button onClick={goToNightsBridge} variant="primary" className="w-full">
           Book This Room
         </Button>
       </div>
